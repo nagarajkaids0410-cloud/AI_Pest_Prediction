@@ -1,87 +1,79 @@
 {% extends 'base.html' %}
-{% block pagetitle %}
-{{title}}
-{% endblock pagetitle %}
+{% block pagetitle %}{{title}}{% endblock pagetitle %}
 {% block body %}
 
-<div>
-  <div class="container">
-    <!-- For demo purpose -->
-    <div class="row mb-5 text-center text-white">
-      <div class="col-lg-10 mx-auto">
-        <h1 class="display-4" style="padding-top: 2%;font-weight: 400;color: rgb(4, 54, 4);""><b>{{title}}🍂</b></h1>
-      </div>
+<div class="row mb-5 text-center text-white">
+    <div class="col-lg-10 mx-auto">
+        <h1 class="display-4 page-title">
+            <i class="fa-solid fa-microscope me-2"></i>Analysis Result
+        </h1>
+        <p class="lead page-subtitle">Here is what our AI detected.</p>
     </div>
-    <center>
-    <div class=" col">
-          <div class="p-3 bg-white shadow rounded-lg" style="width: 30%;">
-
-            <img src={{image_url}} width="350" height="350">
-
-          </div>
-      </div>
-      </center>
-      <br>
-      <div class=" row ">
-        <div class="col mx-auto">
-          <div class="p-5 bg-white shadow rounded-lg" style="height: 95%;">
-
-            <h5><b>
-                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or
-                pred==24 or pred==25 or pred==28 or pred==38 %}
-                Tips to Grow Healthy Plants :
-                {% else %}
-                Brief Descritpion :
-                {% endif %}
-              </b></h5>
-            <p>{{desc}}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col mx-auto">
-          <div class="p-5 bg-white shadow rounded-lg" style="height:95%">
-            <h5><b>
-                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or
-                pred==24 or pred==25 or pred==28 or pred==38 %}
-                Benefits :
-                {% else %}
-                Prevent This Plant Disease By follow below steps :
-                {% endif %}
-              </b></h5>
-            <p>
-              {{prevent}}
-            </p>
-          </div>
-        </div>
-
-        {% if pred!=4 %}
-        <div class="col mx-auto"">
-        <div class=" p-5 bg-white shadow rounded-lg" style="height: 95%;">
-          <center>
-            <h5><b>
-                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or
-                pred==24 or pred==25 or pred==28 or pred==38 %}
-                Fertilizer :
-                {% else %}
-                Supplements :
-                {% endif %}
-              </b></h5>
-            <br>
-            <img src={{simage}} width="300" height="350">
-            <br>
-            <br>
-            <h6>{{sname}}</h6>
-
-            <a target="_blank" href={{buy_link}}><button type="button" class="btn btn-success"
-                style="background-color: #05380b;">Buy Product</button></a>
-          </center>
-        </div>
-      </div>
-      {% endif %}
-
-    </div>
-  </div>
 </div>
+
+<div class="row g-4 justify-content-center pb-5">
+    
+    <!-- Uploaded Image Card -->
+    <div class="col-lg-4 col-md-6">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column align-items-center">
+            <h5 class="fw-bold mb-4" style="color: var(--primary-dark);">Analyzed Image</h5>
+            <div class="position-relative d-inline-block shadow-sm rounded overflow-hidden mb-3">
+                <img src="{{image_url}}" class="img-fluid" style="max-height: 250px; object-fit: cover;" alt="Analyzed leaf">
+            </div>
+            <h4 class="fw-bold mt-auto" style="color: var(--primary);">{{title}}</h4>
+        </div>
+    </div>
+
+    <!-- Description & Tips Card -->
+    <div class="col-lg-4 col-md-6">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
+                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or pred==24 or pred==25 or pred==28 or pred==38 %}
+                <i class="fa-solid fa-seedling text-success me-2"></i>Tips to Grow Healthy Plants:
+                {% else %}
+                <i class="fa-solid fa-circle-info text-primary me-2"></i>Brief Description:
+                {% endif %}
+            </h5>
+            <p class="text-muted" style="font-size: 0.95rem; line-height: 1.6;">{{desc}}</p>
+            
+            <hr class="my-4" style="opacity: 0.1;">
+            
+            <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
+                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or pred==24 or pred==25 or pred==28 or pred==38 %}
+                <i class="fa-solid fa-star text-warning me-2"></i>Benefits:
+                {% else %}
+                <i class="fa-solid fa-shield-virus text-danger me-2"></i>Prevention Steps:
+                {% endif %}
+            </h5>
+            <p class="text-muted mb-0" style="font-size: 0.95rem; line-height: 1.6;">{{prevent}}</p>
+        </div>
+    </div>
+
+    <!-- Supplement Recommendation (Hidden for index 4, assuming background without leaf) -->
+    {% if pred != 4 %}
+    <div class="col-lg-4 col-md-12">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column">
+            <h5 class="fw-bold mb-4" style="color: var(--primary-dark);">
+                {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or pred==24 or pred==25 or pred==28 or pred==38 %}
+                <i class="fa-solid fa-flask text-success me-2"></i>Recommended Fertilizer
+                {% else %}
+                <i class="fa-solid fa-prescription-bottle-medical text-warning me-2"></i>Recommended Supplement
+                {% endif %}
+            </h5>
+            
+            <div class="d-flex justify-content-center mb-3 flex-grow-1">
+                <img src="{{simage}}" class="img-fluid rounded shadow-sm" style="max-height: 200px; object-fit: contain;" alt="{{sname}}">
+            </div>
+            
+            <h6 class="fw-bold mb-3 text-muted">{{sname}}</h6>
+            
+            <a target="_blank" href="{{buy_link}}" class="btn btn-gradient w-100 rounded-pill py-2 mt-auto">
+                <i class="fa-solid fa-cart-shopping me-2"></i>Buy Product
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
 {% endblock body %}

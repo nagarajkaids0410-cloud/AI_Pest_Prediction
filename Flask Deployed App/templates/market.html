@@ -1,43 +1,49 @@
 {% extends 'base.html' %}
-{% block pagetitle %}
-Supplement Market
-{% endblock pagetitle %}
-
+{% block pagetitle %}Supplement Market{% endblock pagetitle %}
 {% block body %}
 
-<br>
 <div class="row mb-5 text-center text-white">
     <div class="col-lg-10 mx-auto">
-        <h1 class="display-4" style="padding-top: 2%;font-weight: 400;color: rgb(4, 54, 4);"><b>🛒Supplements🛒</b></h1>
-        <p class="lead" style="font-weight: 500;color: black;">Buy Supplements & Fertilizer at one place</p>
+        <h1 class="display-4 page-title">
+            <i class="fa-solid fa-store me-2"></i>Supplements Store
+        </h1>
+        <p class="lead page-subtitle">Buy the best supplements and fertilizers for your plants in one place.</p>
     </div>
 </div>
-<div class="row p-3">
-    {% for index in range(0,supplement_name | length) %}
-    {% if index != 4 %}
-    <div class="col">
-        <div class=" p-5 bg-white shadow rounded-lg" style="height: 95%;">
-        <center>
-            {% if index==3 or index==5 or index==7 or index==11 or index==15 or index==18 or index==20 or
-            index==23 or
-            index==24 or index==25 or index==28 or index==38 %}
-            <h5>Fertilizer<b style="color: green;"> (Healthy):</b></h5>
-            {% else %}
-            <h5>Supplements<b style="color: red;"> (Diseased):</b></h5>
-            {% endif %}
-            <br>
-            <img src={{supplement_image[index]}} width="200" height="250">
-            <br>
-            <br>
-            <h6>For {{disease[index]}}</h6>
-            <p>{{supplement_name[index]}}</p>
 
-            <a target="_blank" href={{buy[index]}}><button type="button" class="btn btn-success"
-                    style="background-color: #05380b;">Buy Product</button></a>
-        </center>
-    </div>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 pb-5">
+    {% for index in range(0, supplement_name | length) %}
+        {% if index != 4 %}
+        <div class="col">
+            <div class="glass-card p-4 text-center h-100 d-flex flex-column align-items-center">
+                
+                {% if index==3 or index==5 or index==7 or index==11 or index==15 or index==18 or index==20 or index==23 or index==24 or index==25 or index==28 or index==38 %}
+                <span class="badge bg-success bg-opacity-75 rounded-pill px-3 py-2 mb-3">
+                    <i class="fa-solid fa-leaf me-1"></i> Fertilizer
+                </span>
+                {% else %}
+                <span class="badge bg-danger bg-opacity-75 rounded-pill px-3 py-2 mb-3">
+                    <i class="fa-solid fa-virus me-1"></i> Supplement
+                </span>
+                {% endif %}
+
+                <div class="d-flex align-items-center justify-content-center mb-3" style="height: 180px;">
+                    <img src="{{supplement_image[index]}}" class="img-fluid rounded shadow-sm" style="max-height: 160px; object-fit: contain;" alt="{{supplement_name[index]}}">
+                </div>
+
+                <div class="mb-3 w-100 text-start mt-auto">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">For {{disease[index]}}</small>
+                    <h6 class="fw-bold mt-1" style="color: var(--primary-dark); font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{supplement_name[index]}}</h6>
+                </div>
+
+                <a target="_blank" href="{{buy[index]}}" class="btn btn-outline-success w-100 rounded-pill py-2 mt-2" style="border-width: 2px;">
+                    <i class="fa-solid fa-cart-arrow-down me-1"></i> Buy Now
+                </a>
+
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
 </div>
-{% endif %}
-{% endfor %}
-</div>
+
 {% endblock body %}

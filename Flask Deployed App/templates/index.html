@@ -5,9 +5,9 @@
 <div class="row mb-4 text-center text-white">
     <div class="col-lg-10 mx-auto">
         <h1 class="display-4 page-title">
-            <i class="fa-solid fa-microchip me-2"></i>AI Engine
+            <i class="fa-solid fa-microchip me-2"></i><span data-i18n="engine.title">AI Engine</span>
         </h1>
-        <p class="lead page-subtitle">Upload a photo of a plant leaf and let the AI instantly detect any diseases.</p>
+        <p class="lead page-subtitle" data-i18n="engine.subtitle">Upload a photo of a plant leaf and let the AI instantly detect any diseases.</p>
     </div>
 </div>
 
@@ -16,12 +16,10 @@
     <div class="col-lg-4 col-md-6">
         <div class="glass-card p-4 h-100">
             <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
-                <i class="fa-solid fa-circle-question text-success me-2"></i>Why is it necessary?
+                <i class="fa-solid fa-circle-question text-success me-2"></i><span data-i18n="engine.why_title">Why is it necessary?</span>
             </h5>
-            <p class="text-muted" style="font-size: 0.95rem; line-height: 1.6;">
-                Plant diseases severely affect the growth and yield of their respective species. Early diagnosis is one of the most critical aspects of crop management. 
-                <br><br>
-                Without proper identification, disease control measures can be a waste of time and money, leading to further plant losses. Our AI engine provides an immediate preliminary diagnosis before symptoms worsen.
+            <p class="text-muted" style="font-size: 0.95rem; line-height: 1.6;" data-i18n="engine.why_text">
+                Plant diseases severely affect the growth and yield of their respective species. Early diagnosis is one of the most critical aspects of crop management. Without proper identification, disease control measures can be a waste of time and money, leading to further plant losses. Our AI engine provides an immediate preliminary diagnosis before symptoms worsen.
             </p>
         </div>
     </div>
@@ -43,23 +41,23 @@
                     <div class="position-relative">
                         <input type="file" id="actual-btn" name="image" class="d-none" accept="image/*" />
                         <label for="actual-btn" class="btn btn-outline-success w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 py-2">
-                            <i class="fa-solid fa-upload"></i> Choose Image
+                            <i class="fa-solid fa-upload"></i> <span data-i18n="engine.choose_image">Choose Image</span>
                         </label>
                     </div>
 
                     <!-- Camera Button -->
                     <button type="button" id="camera-btn" class="btn btn-outline-primary w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 py-2">
-                        <i class="fa-solid fa-camera"></i> Open Camera
+                        <i class="fa-solid fa-camera"></i> <span data-i18n="engine.open_camera">Open Camera</span>
                     </button>
                     
-                    <span id="file-chosen" class="text-muted fw-bold small mt-1">No file chosen</span>
+                    <span id="file-chosen" class="text-muted fw-bold small mt-1" data-i18n="engine.no_file">No file chosen</span>
                 </div>
 
                 <!-- Camera Feed Container -->
                 <div id="camera-container" class="mb-3 rounded overflow-hidden shadow-sm" style="display: none; background: #000;">
                     <video id="camera-feed" class="w-100" autoplay playsinline></video>
                     <button type="button" id="capture-btn" class="btn btn-danger w-100 rounded-0 py-2">
-                        <i class="fa-solid fa-camera-retro me-2"></i>Capture Photo
+                        <i class="fa-solid fa-camera-retro me-2"></i><span data-i18n="engine.capture">Capture Photo</span>
                     </button>
                 </div>
 
@@ -68,10 +66,10 @@
                     <img id="preview" src="#" alt="Camera Photo Preview" class="img-fluid rounded shadow-sm" style="display: none; max-height: 200px; object-fit: cover; margin: 0 auto;" />
                 </div>
 
-                <p class="text-muted small mb-4">Simply upload or snap a photo of your plant's leaf, and see the magic of AI.</p>
+                <p class="text-muted small mb-4" data-i18n="engine.upload_hint">Simply upload or snap a photo of your plant's leaf, and see the magic of AI.</p>
 
                 <button type="submit" class="btn btn-gradient w-100 rounded-pill fs-5 py-2 shadow-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Analyze Now
+                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i><span data-i18n="engine.analyze">Analyze Now</span>
                 </button>
             </form>
         </div>
@@ -81,19 +79,19 @@
     <div class="col-lg-4 col-md-12">
         <div class="glass-card p-4 h-100">
             <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
-                <i class="fa-solid fa-shield-halved text-success me-2"></i>Prevention Steps
+                <i class="fa-solid fa-shield-halved text-success me-2"></i><span data-i18n="engine.prevention_title">Prevention Steps</span>
             </h5>
             <ol class="text-muted ps-3 mb-4" style="font-size: 0.95rem; line-height: 1.6;">
-                <li class="mb-2">Follow Good Sanitation Practices.</li>
-                <li class="mb-2">Fertilize to Keep Your Plants Healthy.</li>
-                <li class="mb-2">Inspect Plants for Diseases Before You Bring Them Home.</li>
-                <li class="mb-2">Allow the Soil to Warm Before Planting.</li>
-                <li class="mb-2">Ensure a Healthy Garden By Rotating Crops.</li>
-                <li class="mb-2">Provide Good Air Circulation.</li>
-                <li class="mb-2">Remove Diseased Stems and Foliage.</li>
+                <li class="mb-2" data-i18n="engine.step1">Follow Good Sanitation Practices.</li>
+                <li class="mb-2" data-i18n="engine.step2">Fertilize to Keep Your Plants Healthy.</li>
+                <li class="mb-2" data-i18n="engine.step3">Inspect Plants for Diseases Before You Bring Them Home.</li>
+                <li class="mb-2" data-i18n="engine.step4">Allow the Soil to Warm Before Planting.</li>
+                <li class="mb-2" data-i18n="engine.step5">Ensure a Healthy Garden By Rotating Crops.</li>
+                <li class="mb-2" data-i18n="engine.step6">Provide Good Air Circulation.</li>
+                <li class="mb-2" data-i18n="engine.step7">Remove Diseased Stems and Foliage.</li>
             </ol>
             <a target="_blank" href="https://www.thespruce.com/prevent-plant-diseases-in-your-garden-2539511" class="btn btn-outline-dark btn-sm rounded-pill px-4">
-                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Read More
+                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> <span data-i18n="engine.read_more">Read More</span>
             </a>
         </div>
     </div>

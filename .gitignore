@@ -6,3 +6,6 @@ __pycache__/
 *.pth
 *.zip
 .ipynb_checkpoints/
+Flask Deployed App/static/uploads/*
+!Flask Deployed App/static/uploads/Readme.md
+!Flask Deployed App/static/uploads/potato.webp

@@ -54,18 +54,18 @@
         }
 
         .glass-navbar {
-            background: rgba(10, 58, 42, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 0;
+            background: rgba(10, 58, 42, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 0.85rem 0;
             z-index: 1000;
         }
 
         .nav-link {
             color: rgba(255, 255, 255, 0.85) !important;
             font-weight: 500;
-            margin: 0 10px;
+            margin: 0 8px;
             transition: all 0.3s ease;
             position: relative;
         }
@@ -185,7 +185,7 @@
             color: rgba(255, 255, 255, 0.6);
         }
         
-        /* Typography overrides */
+        /* Typography */
         .page-title {
             font-weight: 700;
             color: #ffffff;
@@ -197,6 +197,405 @@
             font-weight: 400;
             font-size: 1.1rem;
         }
+
+        /* Language Selector Dropdown */
+        .lang-dropdown-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff !important;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .lang-dropdown-btn:hover, .lang-dropdown-btn:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: var(--secondary);
+            color: #fff !important;
+        }
+        .lang-menu {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-width: 170px;
+            padding: 6px;
+        }
+        .lang-menu .dropdown-item {
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #1f2937;
+            transition: all 0.15s ease;
+        }
+        .lang-menu .dropdown-item:hover, .lang-menu .dropdown-item.active {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--primary);
+        }
+
+        /* Floating Action Buttons Container */
+        .fab-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1040;
+        }
+        .voice-fab {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border: none;
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        .voice-fab:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.6);
+        }
+        .voice-fab.listening {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            animation: fabPulse 1.4s infinite;
+        }
+        @keyframes fabPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.08); box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .chat-fab {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            box-shadow: 0 6px 22px rgba(46, 204, 113, 0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .chat-fab:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.65);
+        }
+        .chat-badge-pulse {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 13px;
+            height: 13px;
+            background-color: #ef4444;
+            border: 2px solid white;
+            border-radius: 50%;
+            animation: badgePing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes badgePing {
+            0% { opacity: 1; transform: scale(1); }
+            75%, 100% { opacity: 0; transform: scale(1.7); }
+        }
+
+        /* AI Chatbot Widget */
+        .chat-widget {
+            position: fixed;
+            bottom: 96px;
+            right: 24px;
+            width: 380px;
+            max-width: calc(100vw - 32px);
+            height: 550px;
+            max-height: calc(100vh - 120px);
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1050;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .chat-widget.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+        .chat-header {
+            background: linear-gradient(135deg, #0a3a2a, #1a7a50);
+            color: white;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chat-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(46, 204, 113, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2ecc71;
+            font-size: 17px;
+        }
+        .btn-chat-icon {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-chat-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .btn-chat-icon.muted {
+            opacity: 0.5;
+        }
+        .chat-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #fafcfb;
+        }
+        .chat-msg {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .chat-msg.user {
+            align-items: flex-end;
+        }
+        .chat-msg.bot {
+            align-items: flex-start;
+        }
+        .chat-bubble {
+            max-width: 85%;
+            font-size: 0.91rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+        .chat-bubble.user {
+            background: linear-gradient(135deg, #1a7a50, #2ecc71);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+            padding: 10px 15px;
+            box-shadow: 0 4px 12px rgba(26, 122, 80, 0.25);
+        }
+        .chat-bubble.bot {
+            background: white;
+            color: #1f2937;
+            border: 1px solid rgba(26, 122, 80, 0.12);
+            border-radius: 18px 18px 18px 4px;
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .chat-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .chat-suggestion-chip {
+            background: rgba(46, 204, 113, 0.12);
+            border: 1px solid rgba(46, 204, 113, 0.35);
+            color: #11593c;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chat-suggestion-chip:hover {
+            background: #2ecc71;
+            color: white;
+            border-color: #2ecc71;
+            transform: translateY(-1px);
+        }
+        .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+            padding: 10px 14px;
+        }
+        .typing-dots span {
+            width: 7px;
+            height: 7px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: bounceDots 1.4s infinite ease-in-out both;
+        }
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounceDots {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        .chat-footer {
+            padding: 12px 14px;
+            background: rgba(245, 250, 247, 0.95);
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: white;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 30px;
+            padding: 4px 6px 4px 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .chat-input-wrapper input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 0.88rem;
+            background: transparent;
+            color: #1f2937;
+        }
+        .chat-mic-btn, .chat-send-btn {
+            border: none;
+            background: transparent;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chat-mic-btn {
+            color: #0ea5e9;
+        }
+        .chat-mic-btn:hover {
+            background: rgba(14, 165, 233, 0.12);
+        }
+        .chat-send-btn {
+            background: linear-gradient(135deg, #1a7a50, #2ecc71);
+            color: white;
+        }
+        .chat-send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(46, 204, 113, 0.4);
+        }
+
+        /* Voice Listening Overlay Modal */
+        .voice-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 58, 42, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .voice-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .voice-card {
+            background: white;
+            border-radius: 26px;
+            padding: 38px 32px 30px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+        }
+        .voice-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .voice-close-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        .voice-waves {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .voice-waves .wave {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(14, 165, 233, 0.4);
+            animation: waveRipple 2s infinite cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+        .voice-waves .wave1 { width: 100px; height: 100px; animation-delay: 0s; }
+        .voice-waves .wave2 { width: 130px; height: 130px; animation-delay: 0.5s; }
+        .voice-waves .wave3 { width: 160px; height: 160px; animation-delay: 1s; }
+        @keyframes waveRipple {
+            0% { transform: scale(0.6); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+        .voice-icon-center {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.45);
+            z-index: 2;
+        }
     </style>
 </head>
 
@@ -204,24 +603,39 @@
     <nav class="navbar navbar-expand-lg navbar-dark glass-navbar sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold fs-4" href="/">
-                <i class="fa-solid fa-leaf text-success me-2"></i>AI Plant Engine
+                <i class="fa-solid fa-leaf text-success me-2"></i><span data-i18n="nav.brand">AI Plant Engine</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link" href="/" data-i18n="nav.home">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/index">Detector</a>
+                        <a class="nav-link" href="/index" data-i18n="nav.detector">Detector</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/market">Supplements</a>
+                        <a class="nav-link" href="/market" data-i18n="nav.supplements">Supplements</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/contact">Contact Us</a>
+                        <a class="nav-link" href="/contact" data-i18n="nav.contact">Contact Us</a>
+                    </li>
+                    
+                    <!-- Language Selector Dropdown -->
+                    <li class="nav-item dropdown ms-lg-2 mt-2 mt-lg-0">
+                        <button class="btn lang-dropdown-btn dropdown-toggle d-flex align-items-center gap-1" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-globe"></i>
+                            <span id="current-lang-label">English</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end lang-menu" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item lang-option active" href="#" data-lang="en">🇬🇧 English</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="hi">🇮🇳 हिन्दी (Hindi)</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="kn">🇮🇳 ಕನ್ನಡ (Kannada)</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="ta">🇮🇳 தமிழ் (Tamil)</a></li>
+                            <li><a class="dropdown-item lang-option" href="#" data-lang="te">🇮🇳 తెలుగు (Telugu)</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -231,6 +645,68 @@
     <div class="container py-5 flex-grow-1">
         {% block body %}
         {% endblock body %}
+    </div>
+
+    <!-- Floating Action Buttons (Mic & Chat) -->
+    <div class="fab-container">
+        <button id="voice-fab-btn" class="voice-fab" title="Voice Assistant">
+            <i class="fa-solid fa-microphone"></i>
+        </button>
+        <button id="chat-toggle" class="chat-fab" title="AI Plant Assistant">
+            <i class="fa-solid fa-comments"></i>
+            <span class="chat-badge-pulse"></span>
+        </button>
+    </div>
+
+    <!-- AI Chatbot Widget -->
+    <div id="chat-widget" class="chat-widget">
+        <div class="chat-header">
+            <div class="d-flex align-items-center gap-2">
+                <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                    <h6 class="m-0 fw-bold" data-i18n="chat.title">AI Plant Assistant</h6>
+                    <small class="text-white-50"><i class="fa-solid fa-circle text-success me-1" style="font-size: 8px;"></i>Online • 24/7 Guide</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+                <button id="chat-tts-toggle" class="btn-chat-icon" title="Voice responses ON">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button id="chat-close" class="btn-chat-icon" title="Close chat">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+        <div id="chat-messages" class="chat-body">
+            <!-- Messages populated by chatbot.js -->
+        </div>
+        <div class="chat-footer">
+            <div class="chat-input-wrapper">
+                <input type="text" id="chat-input" placeholder="Ask about plant diseases..." data-i18n="chat.placeholder" autocomplete="off" />
+                <button type="button" id="chat-voice-btn" class="chat-mic-btn" title="Speak message" onclick="window.voiceAssistant && window.voiceAssistant.start()">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button type="button" id="chat-send" class="chat-send-btn" title="Send message">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice Listening Overlay -->
+    <div id="voice-listening-overlay" class="voice-overlay">
+        <div class="voice-card">
+            <button id="voice-overlay-close" class="voice-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+            <div class="voice-waves">
+                <div class="wave wave1"></div>
+                <div class="wave wave2"></div>
+                <div class="wave wave3"></div>
+                <div class="voice-icon-center"><i class="fa-solid fa-microphone"></i></div>
+            </div>
+            <h5 id="voice-status-text" class="mt-4 fw-bold">Listening... Speak about any plant or disease</h5>
+            <p id="voice-transcript-text" class="text-muted mt-2 fst-italic" style="min-height: 24px;">Say "What diseases affect tomato?"</p>
+            <p class="small text-secondary mt-1">Supports English, Hindi, Kannada, Tamil, Telugu</p>
+        </div>
     </div>
 
     <div class="footer-basic">
@@ -243,17 +719,22 @@
                 </div>
                 
                 <ul class="list-inline">
-                    <li class="list-inline-item"><a href="/">Home</a></li>
-                    <li class="list-inline-item"><a href="/index">AI Engine</a></li>
-                    <li class="list-inline-item"><a href="/contact">Contact</a></li>
+                    <li class="list-inline-item"><a href="/" data-i18n="footer.home">Home</a></li>
+                    <li class="list-inline-item"><a href="/index" data-i18n="footer.engine">AI Engine</a></li>
+                    <li class="list-inline-item"><a href="/contact" data-i18n="footer.contact">Contact</a></li>
                 </ul>
                 
-                <p class="copyright">Designed & Developed by Nagaraj K</p>
+                <p class="copyright" data-i18n="footer.credit">Designed & Developed by Nagaraj K</p>
             </div>
         </footer>
     </div>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AI Features JavaScript -->
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/voice.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 </body>
 </html>

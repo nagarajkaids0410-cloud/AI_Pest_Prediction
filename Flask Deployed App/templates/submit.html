@@ -5,9 +5,9 @@
 <div class="row mb-5 text-center text-white">
     <div class="col-lg-10 mx-auto">
         <h1 class="display-4 page-title">
-            <i class="fa-solid fa-microscope me-2"></i>Analysis Result
+            <i class="fa-solid fa-microscope me-2"></i><span data-i18n="submit.title">Analysis Result</span>
         </h1>
-        <p class="lead page-subtitle">Here is what our AI detected.</p>
+        <p class="lead page-subtitle" data-i18n="submit.subtitle">Here is what our AI detected.</p>
     </div>
 </div>
 
@@ -16,7 +16,7 @@
     <!-- Uploaded Image Card -->
     <div class="col-lg-4 col-md-6">
         <div class="glass-card p-4 text-center h-100 d-flex flex-column align-items-center">
-            <h5 class="fw-bold mb-4" style="color: var(--primary-dark);">Analyzed Image</h5>
+            <h5 class="fw-bold mb-4" style="color: var(--primary-dark);" data-i18n="submit.analyzed">Analyzed Image</h5>
             <div class="d-flex align-items-center justify-content-center mb-3 shadow-sm rounded overflow-hidden bg-white p-2" style="width: 100%; height: 260px;">
                 <img src="{{image_url}}" class="img-fluid rounded" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="{{title}}">
             </div>
@@ -29,9 +29,9 @@
         <div class="glass-card p-4 h-100">
             <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
                 {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or pred==24 or pred==25 or pred==28 or pred==38 %}
-                <i class="fa-solid fa-seedling text-success me-2"></i>Tips to Grow Healthy Plants:
+                <i class="fa-solid fa-seedling text-success me-2"></i><span data-i18n="submit.tips">Tips to Grow Healthy Plants:</span>
                 {% else %}
-                <i class="fa-solid fa-circle-info text-primary me-2"></i>Brief Description:
+                <i class="fa-solid fa-circle-info text-primary me-2"></i><span data-i18n="submit.description">Brief Description:</span>
                 {% endif %}
             </h5>
             <p class="text-muted" style="font-size: 0.95rem; line-height: 1.6;">{{desc}}</p>
@@ -40,9 +40,9 @@
             
             <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
                 {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or pred==24 or pred==25 or pred==28 or pred==38 %}
-                <i class="fa-solid fa-star text-warning me-2"></i>Benefits:
+                <i class="fa-solid fa-star text-warning me-2"></i><span data-i18n="submit.benefits">Benefits:</span>
                 {% else %}
-                <i class="fa-solid fa-shield-virus text-danger me-2"></i>Prevention Steps:
+                <i class="fa-solid fa-shield-virus text-danger me-2"></i><span data-i18n="submit.prevention">Prevention Steps:</span>
                 {% endif %}
             </h5>
             <p class="text-muted mb-0" style="font-size: 0.95rem; line-height: 1.6;">{{prevent}}</p>
@@ -55,9 +55,9 @@
         <div class="glass-card p-4 text-center h-100 d-flex flex-column">
             <h5 class="fw-bold mb-4" style="color: var(--primary-dark);">
                 {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or pred==24 or pred==25 or pred==28 or pred==38 %}
-                <i class="fa-solid fa-flask text-success me-2"></i>Recommended Fertilizer
+                <i class="fa-solid fa-flask text-success me-2"></i><span data-i18n="submit.fertilizer">Recommended Fertilizer</span>
                 {% else %}
-                <i class="fa-solid fa-prescription-bottle-medical text-warning me-2"></i>Recommended Supplement
+                <i class="fa-solid fa-prescription-bottle-medical text-warning me-2"></i><span data-i18n="submit.supplement">Recommended Supplement</span>
                 {% endif %}
             </h5>
             
@@ -68,7 +68,7 @@
             <h6 class="fw-bold mb-3 text-muted">{{sname}}</h6>
             
             <a target="_blank" href="{{buy_link}}" class="btn btn-gradient w-100 rounded-pill py-2 mt-auto">
-                <i class="fa-solid fa-cart-shopping me-2"></i>Buy Product
+                <i class="fa-solid fa-cart-shopping me-2"></i><span data-i18n="submit.buy">Buy Product</span>
             </a>
         </div>
     </div>

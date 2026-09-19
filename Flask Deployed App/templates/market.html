@@ -5,9 +5,9 @@
 <div class="row mb-5 text-center text-white">
     <div class="col-lg-10 mx-auto">
         <h1 class="display-4 page-title">
-            <i class="fa-solid fa-store me-2"></i>Supplements Store
+            <i class="fa-solid fa-store me-2"></i><span data-i18n="market.title">Supplements Store</span>
         </h1>
-        <p class="lead page-subtitle">Buy the best supplements and fertilizers for your plants in one place.</p>
+        <p class="lead page-subtitle" data-i18n="market.subtitle">Buy the best supplements and fertilizers for your plants in one place.</p>
     </div>
 </div>
 
@@ -19,11 +19,11 @@
                 
                 {% if index==3 or index==5 or index==7 or index==11 or index==15 or index==18 or index==20 or index==23 or index==24 or index==25 or index==28 or index==38 %}
                 <span class="badge bg-success bg-opacity-75 rounded-pill px-3 py-2 mb-3">
-                    <i class="fa-solid fa-leaf me-1"></i> Fertilizer
+                    <i class="fa-solid fa-leaf me-1"></i> <span data-i18n="market.fertilizer_badge">Fertilizer</span>
                 </span>
                 {% else %}
                 <span class="badge bg-danger bg-opacity-75 rounded-pill px-3 py-2 mb-3">
-                    <i class="fa-solid fa-virus me-1"></i> Supplement
+                    <i class="fa-solid fa-virus me-1"></i> <span data-i18n="market.supplement_badge">Supplement</span>
                 </span>
                 {% endif %}
 
@@ -32,12 +32,12 @@
                 </div>
 
                 <div class="mb-3 w-100 text-start mt-auto">
-                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">For {{disease[index]}}</small>
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;"><span data-i18n="market.for">For</span> {{disease[index]}}</small>
                     <h6 class="fw-bold mt-1" style="color: var(--primary-dark); font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{supplement_name[index]}}</h6>
                 </div>
 
                 <a target="_blank" href="{{buy[index]}}" class="btn btn-outline-success w-100 rounded-pill py-2 mt-2" style="border-width: 2px;">
-                    <i class="fa-solid fa-cart-arrow-down me-1"></i> Buy Now
+                    <i class="fa-solid fa-cart-arrow-down me-1"></i> <span data-i18n="market.buy">Buy Now</span>
                 </a>
 
             </div>

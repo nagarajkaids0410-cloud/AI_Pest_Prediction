@@ -17,8 +17,8 @@
     <div class="col-lg-4 col-md-6">
         <div class="glass-card p-4 text-center h-100 d-flex flex-column align-items-center">
             <h5 class="fw-bold mb-4" style="color: var(--primary-dark);">Analyzed Image</h5>
-            <div class="position-relative d-inline-block shadow-sm rounded overflow-hidden mb-3">
-                <img src="{{image_url}}" class="img-fluid" style="max-height: 250px; object-fit: cover;" alt="Analyzed leaf">
+            <div class="d-flex align-items-center justify-content-center mb-3 shadow-sm rounded overflow-hidden bg-white p-2" style="width: 100%; height: 260px;">
+                <img src="{{image_url}}" class="img-fluid rounded" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="{{title}}">
             </div>
             <h4 class="fw-bold mt-auto" style="color: var(--primary);">{{title}}</h4>
         </div>

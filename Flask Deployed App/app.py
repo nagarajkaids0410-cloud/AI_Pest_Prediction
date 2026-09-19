@@ -47,21 +47,29 @@ def mobile_device_detected_page():
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
     if request.method == 'POST':
-        image = request.files['image']
+        image = request.files.get('image')
+        if not image or image.filename == '':
+            return redirect('/index')
         filename = image.filename
-        file_path = os.path.join('static/uploads', filename)
+        upload_folder = os.path.join('static', 'uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+        file_path = os.path.join(upload_folder, filename)
         image.save(file_path)
-        print(file_path)
+        print("Uploaded image saved at:", file_path)
         pred = prediction(file_path)
         title = disease_info['disease_name'][pred]
-        description =disease_info['description'][pred]
+        description = disease_info['description'][pred]
         prevent = disease_info['Possible Steps'][pred]
-        image_url = disease_info['image_url'][pred]
+        uploaded_image_url = '/' + file_path.replace('\\', '/')
+        reference_image_url = disease_info['image_url'][pred]
         supplement_name = supplement_info['supplement name'][pred]
         supplement_image_url = supplement_info['supplement image'][pred]
         supplement_buy_link = supplement_info['buy link'][pred]
-        return render_template('submit.html' , title = title , desc = description , prevent = prevent , 
-                               image_url = image_url , pred = pred ,sname = supplement_name , simage = supplement_image_url , buy_link = supplement_buy_link)
+        return render_template('submit.html', title=title, desc=description, prevent=prevent, 
+                               image_url=uploaded_image_url, user_image=uploaded_image_url,
+                               reference_image=reference_image_url,
+                               pred=pred, sname=supplement_name, simage=supplement_image_url, buy_link=supplement_buy_link)
+    return redirect('/index')
 
 @app.route('/market', methods=['GET', 'POST'])
 def market():

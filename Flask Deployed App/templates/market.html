@@ -28,7 +28,7 @@
                 {% endif %}
 
                 <div class="d-flex align-items-center justify-content-center mb-3" style="height: 180px;">
-                    <img src="{{supplement_image[index]}}" class="img-fluid rounded shadow-sm" style="max-height: 160px; object-fit: contain;" alt="{{supplement_name[index]}}">
+                    <img src="{{supplement_image[index]}}" class="img-fluid rounded shadow-sm" style="max-height: 160px; object-fit: contain;" alt="{{supplement_name[index]}}" onerror="this.onerror=null; this.src='/static/images/supplements/default_supplement.jpg';">
                 </div>
 
                 <div class="mb-3 w-100 text-start mt-auto">

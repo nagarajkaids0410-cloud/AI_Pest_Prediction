@@ -1,0 +1,477 @@
+{% extends 'base.html' %}
+{% block pagetitle %}My Garden Journal{% endblock pagetitle %}
+{% block body %}
+
+<div class="row mb-5 text-center text-white">
+    <div class="col-lg-10 mx-auto">
+        <h1 class="display-4 page-title">
+            <i class="fa-solid fa-book-medical me-2"></i>My Garden Journal
+        </h1>
+        <p class="lead page-subtitle">Track your plant health history, monitor recovery, and keep a timeline of all diagnoses.</p>
+    </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="row g-3 justify-content-center mb-4">
+    <div class="col-lg-2 col-md-3 col-6">
+        <div class="glass-card p-3 text-center">
+            <h3 class="fw-bold mb-0" style="color: var(--primary);" id="stat-total">0</h3>
+            <small class="text-muted">Total Scans</small>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-3 col-6">
+        <div class="glass-card p-3 text-center">
+            <h3 class="fw-bold mb-0" style="color: #22c55e;" id="stat-healthy">0</h3>
+            <small class="text-muted">Healthy</small>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-3 col-6">
+        <div class="glass-card p-3 text-center">
+            <h3 class="fw-bold mb-0" style="color: #ef4444;" id="stat-diseased">0</h3>
+            <small class="text-muted">Diseased</small>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-3 col-6">
+        <div class="glass-card p-3 text-center">
+            <h3 class="fw-bold mb-0" style="color: #0ea5e9;" id="stat-recovering">0</h3>
+            <small class="text-muted">Recovering</small>
+        </div>
+    </div>
+</div>
+
+<!-- Filter & Actions -->
+<div class="row g-3 justify-content-center mb-4">
+    <div class="col-lg-8">
+        <div class="glass-card p-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="text-muted small fw-bold">Filter:</span>
+                    <button class="btn btn-sm rounded-pill filter-btn active" data-filter="all" onclick="filterJournal('all', this)">All</button>
+                    <button class="btn btn-sm rounded-pill filter-btn" data-filter="diagnosed" onclick="filterJournal('diagnosed', this)">
+                        <i class="fa-solid fa-virus me-1"></i>Diseased
+                    </button>
+                    <button class="btn btn-sm rounded-pill filter-btn" data-filter="healthy" onclick="filterJournal('healthy', this)">
+                        <i class="fa-solid fa-seedling me-1"></i>Healthy
+                    </button>
+                    <button class="btn btn-sm rounded-pill filter-btn" data-filter="recovering" onclick="filterJournal('recovering', this)">
+                        <i class="fa-solid fa-heart-pulse me-1"></i>Recovering
+                    </button>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm rounded-pill" style="background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2);" onclick="clearJournal()">
+                        <i class="fa-solid fa-trash-can me-1"></i>Clear All
+                    </button>
+                    <a href="/index" class="btn btn-gradient btn-sm rounded-pill">
+                        <i class="fa-solid fa-plus me-1"></i>New Scan
+                    </a>
+                </div>
+            </div>
+            
+            <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
+                <span class="text-muted small"><i class="fa-solid fa-layer-group me-2"></i><strong>Batch Analysis:</strong> Aggregate your recent scans to get a field-level overview.</span>
+                <button class="btn btn-sm rounded-pill" style="background: rgba(14,165,233,0.1); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.3);" onclick="generateFieldReport()" data-bs-toggle="modal" data-bs-target="#fieldReportModal">
+                    <i class="fa-solid fa-chart-pie me-1"></i>Generate Field Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Field Report Modal -->
+<div class="modal fade" id="fieldReportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; border: none;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-chart-pie me-2"></i>Field-Level Health Report</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <p class="text-muted small mb-4">Aggregated analysis based on your currently filtered journal entries.</p>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <h2 class="fw-bold mb-0" style="color: var(--primary);" id="report-sample-size">0</h2>
+                            <small class="text-muted">Samples Analyzed</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <h2 class="fw-bold mb-0" id="report-avg-severity" style="color: #f59e0b;">0%</h2>
+                            <small class="text-muted">Avg. Severity</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-start p-3 rounded mb-3" style="background: rgba(239,68,68,0.05); border-left: 4px solid #ef4444;">
+                    <small class="text-muted fw-bold text-uppercase">Dominant Threat</small>
+                    <h5 class="fw-bold mb-1 mt-1" style="color: var(--primary-dark);" id="report-dominant-disease">None</h5>
+                    <p class="small text-muted mb-0" id="report-dominant-count">0/0 samples affected</p>
+                </div>
+
+                <div class="text-start p-3 rounded" style="background: rgba(46,204,113,0.05); border-left: 4px solid #2ecc71;">
+                    <small class="text-muted fw-bold text-uppercase">Primary Recommendation</small>
+                    <p class="fw-bold mb-0 mt-1" style="color: var(--primary-dark);" id="report-recommendation">N/A</p>
+                </div>
+            </div>
+            <div class="modal-footer" style="border: none; background: #f8fafc;">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Journal Timeline -->
+<div class="row justify-content-center pb-5">
+    <div class="col-lg-8">
+        <div id="journal-entries">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Empty state -->
+        <div id="journal-empty" class="text-center text-white py-5" style="display: none;">
+            <i class="fa-solid fa-leaf" style="font-size: 4rem; opacity: 0.3;"></i>
+            <h5 class="mt-3" style="opacity: 0.7;">Your garden journal is empty</h5>
+            <p style="opacity: 0.5;">Analyze a plant leaf with our AI Detector and it will appear here in your timeline.</p>
+            <a href="/index" class="btn btn-gradient rounded-pill px-4 mt-2">
+                <i class="fa-solid fa-microscope me-2"></i>Start Scanning
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .filter-btn {
+        background: rgba(255,255,255,0.2);
+        color: rgba(255,255,255,0.8);
+        border: 1px solid rgba(255,255,255,0.15);
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .filter-btn:hover, .filter-btn.active {
+        background: var(--secondary);
+        color: white;
+        border-color: var(--secondary);
+    }
+
+    .journal-entry {
+        animation: entrySlideIn 0.4s ease forwards;
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    @keyframes entrySlideIn {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .timeline-connector {
+        width: 2px;
+        height: 24px;
+        background: rgba(255,255,255,0.2);
+        margin: 0 auto;
+    }
+
+    .status-select {
+        font-size: 0.78rem;
+        border-radius: 8px;
+        padding: 4px 8px;
+        border: 1px solid rgba(0,0,0,0.1);
+        background: white;
+        cursor: pointer;
+    }
+
+    .journal-note-input {
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 0.82rem;
+        width: 100%;
+        resize: none;
+        transition: border-color 0.2s ease;
+    }
+    .journal-note-input:focus {
+        outline: none;
+        border-color: var(--secondary);
+    }
+
+    .severity-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 4px;
+    }
+</style>
+
+<script>
+    let currentFilter = 'all';
+
+    function getJournal() {
+        return JSON.parse(localStorage.getItem('plantJournal') || '[]');
+    }
+
+    function saveJournal(journal) {
+        localStorage.setItem('plantJournal', JSON.stringify(journal));
+    }
+
+    function renderJournal() {
+        const journal = getJournal();
+        const container = document.getElementById('journal-entries');
+        const emptyState = document.getElementById('journal-empty');
+
+        // Update stats
+        document.getElementById('stat-total').textContent = journal.length;
+        document.getElementById('stat-healthy').textContent = journal.filter(e => e.status === 'healthy').length;
+        document.getElementById('stat-diseased').textContent = journal.filter(e => e.status === 'diagnosed').length;
+        document.getElementById('stat-recovering').textContent = journal.filter(e => e.status === 'recovering').length;
+
+        // Filter
+        const filtered = currentFilter === 'all' ? journal : journal.filter(e => e.status === currentFilter);
+
+        if (journal.length === 0) {
+            container.innerHTML = '';
+            emptyState.style.display = '';
+            return;
+        }
+        emptyState.style.display = 'none';
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="text-center text-white py-3"><p style="opacity: 0.6;">No entries match this filter.</p></div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map((entry, i) => {
+            const date = new Date(entry.date);
+            const dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            const statusColors = {
+                'healthy': '#22c55e',
+                'diagnosed': '#ef4444',
+                'recovering': '#0ea5e9',
+                'recovered': '#22c55e'
+            };
+            const statusIcons = {
+                'healthy': 'fa-seedling',
+                'diagnosed': 'fa-virus',
+                'recovering': 'fa-heart-pulse',
+                'recovered': 'fa-circle-check'
+            };
+
+            const color = statusColors[entry.status] || '#6b7280';
+            const icon = statusIcons[entry.status] || 'fa-leaf';
+
+            let severityHtml = '';
+            if (entry.severity_pct !== null && entry.severity_pct !== undefined) {
+                const sevColor = entry.severity_label === 'Severe' ? '#ef4444' : entry.severity_label === 'Moderate' ? '#f59e0b' : '#22c55e';
+                severityHtml = `
+                    <span class="badge rounded-pill" style="background: ${sevColor}20; color: ${sevColor}; font-size: 0.7rem;">
+                        <span class="severity-dot" style="background: ${sevColor};"></span>
+                        ${entry.severity_pct}% ${entry.severity_label}
+                    </span>
+                `;
+            }
+
+            return `
+                ${i > 0 ? '<div class="timeline-connector"></div>' : ''}
+                <div class="glass-card p-4 journal-entry" style="animation-delay: ${i * 0.1}s; border-left: 4px solid ${color};">
+                    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+                        <div>
+                            <h6 class="fw-bold mb-1" style="color: var(--primary-dark);">
+                                <i class="fa-solid ${icon} me-2" style="color: ${color};"></i>${entry.disease}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="fa-solid fa-calendar me-1"></i>${dateStr} at ${timeStr}
+                            </small>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            ${severityHtml}
+                            <span class="badge rounded-pill" style="background: rgba(14,165,233,0.1); color: #0ea5e9; font-size: 0.7rem;">
+                                ${entry.confidence}% confident
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-3 flex-wrap">
+                        ${entry.image_url ? `
+                        <div>
+                            <img src="${entry.image_url}" class="rounded shadow-sm" style="width: 80px; height: 80px; object-fit: cover;" alt="${entry.disease}" onerror="this.style.display='none'">
+                        </div>
+                        ` : ''}
+                        ${entry.heatmap_url ? `
+                        <div>
+                            <img src="${entry.heatmap_url}" class="rounded shadow-sm" style="width: 80px; height: 80px; object-fit: cover;" alt="Heatmap" onerror="this.style.display='none'">
+                            <small class="d-block text-muted text-center" style="font-size: 0.65rem;">Heatmap</small>
+                        </div>
+                        ` : ''}
+                        <div class="flex-grow-1">
+                            <div class="d-flex gap-2 align-items-center mb-2">
+                                <small class="text-muted fw-bold">Status:</small>
+                                <select class="status-select" onchange="updateStatus(${entry.id}, this.value)">
+                                    <option value="diagnosed" ${entry.status === 'diagnosed' ? 'selected' : ''}>🔴 Diagnosed</option>
+                                    <option value="recovering" ${entry.status === 'recovering' ? 'selected' : ''}>🔵 Recovering</option>
+                                    <option value="recovered" ${entry.status === 'recovered' ? 'selected' : ''}>🟢 Recovered</option>
+                                    <option value="healthy" ${entry.status === 'healthy' ? 'selected' : ''}>🌱 Healthy</option>
+                                </select>
+                            </div>
+                            <textarea class="journal-note-input" rows="2"
+                                      placeholder="Add notes (e.g., applied neem oil, watered less)..."
+                                      onblur="updateNotes(${entry.id}, this.value)">${entry.notes || ''}</textarea>
+                        </div>
+                    </div>
+
+                    ${entry.supplement ? `
+                    <div class="d-flex align-items-center gap-2 mt-3 p-2 rounded" style="background: rgba(46,204,113,0.06);">
+                        <i class="fa-solid fa-prescription-bottle-medical" style="color: var(--secondary);"></i>
+                        <small class="text-muted">Treatment: <strong>${entry.supplement}</strong></small>
+                        ${entry.buy_link ? `<a href="${entry.buy_link}" target="_blank" class="ms-auto small text-decoration-none" style="color: var(--primary);"><i class="fa-solid fa-cart-shopping me-1"></i>Buy</a>` : ''}
+                    </div>
+                    ` : ''}
+
+                    <div class="d-flex justify-content-between mt-2 align-items-center">
+                        <div class="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" style="font-size: 0.72rem; color: var(--primary); background: rgba(26,122,80,0.1);" type="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-bell me-1"></i>Set Reminder
+                            </button>
+                            <ul class="dropdown-menu" style="font-size: 0.8rem;">
+                                <li><a class="dropdown-item" href="#" onclick="scheduleReminder('${entry.disease}', 1); return false;">In 1 Day (Tomorrow)</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="scheduleReminder('${entry.disease}', 3); return false;">In 3 Days</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="scheduleReminder('${entry.disease}', 7); return false;">In 7 Days (1 Week)</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" style="font-size: 0.72rem; color: #ef4444; opacity: 0.6;" onclick="deleteEntry(${entry.id})">
+                            <i class="fa-solid fa-trash-can me-1"></i>Remove
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function filterJournal(filter, btn) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderJournal();
+    }
+
+    function updateStatus(id, status) {
+        const journal = getJournal();
+        const entry = journal.find(e => e.id === id);
+        if (entry) { entry.status = status; saveJournal(journal); renderJournal(); }
+    }
+
+    function updateNotes(id, notes) {
+        const journal = getJournal();
+        const entry = journal.find(e => e.id === id);
+        if (entry) { entry.notes = notes; saveJournal(journal); }
+    }
+
+    function deleteEntry(id) {
+        if (!confirm('Remove this entry from your journal?')) return;
+        const journal = getJournal().filter(e => e.id !== id);
+        saveJournal(journal);
+        renderJournal();
+    }
+
+    function clearJournal() {
+        if (!confirm('Clear all journal entries? This cannot be undone.')) return;
+        localStorage.removeItem('plantJournal');
+        renderJournal();
+    }
+
+    // Smart Care Reminders
+    function scheduleReminder(diseaseName, days) {
+        if (!("Notification" in window)) {
+            alert("This browser does not support desktop notification");
+            return;
+        }
+
+        Notification.requestPermission().then(function (permission) {
+            if (permission === "granted") {
+                const date = new Date();
+                date.setDate(date.getDate() + days);
+                const dateString = date.toLocaleDateString();
+                
+                alert(`Reminder scheduled! We will remind you to check on your ${diseaseName} on ${dateString}.`);
+                
+                setTimeout(() => {
+                    new Notification("🌱 Plant Care Reminder Scheduled", {
+                        body: `Reminder set to check your ${diseaseName} in ${days} days. Keep up the good work!`,
+                        icon: "/static/images/icon-192.png"
+                    });
+                }, 1000);
+            } else {
+                alert("Please enable notifications to use the Smart Reminders feature.");
+            }
+        });
+    }
+
+    // Field Report Generation (Batch Analysis)
+    function generateFieldReport() {
+        const journal = getJournal();
+        const filtered = currentFilter === 'all' ? journal : journal.filter(e => e.status === currentFilter);
+        
+        document.getElementById('report-sample-size').textContent = filtered.length;
+
+        if (filtered.length === 0) {
+            document.getElementById('report-avg-severity').textContent = '0%';
+            document.getElementById('report-dominant-disease').textContent = 'None';
+            document.getElementById('report-dominant-count').textContent = '0/0 samples affected';
+            document.getElementById('report-recommendation').textContent = 'N/A';
+            return;
+        }
+
+        // Calculate average severity
+        let totalSev = 0;
+        let sevCount = 0;
+        
+        // Find dominant disease
+        const diseaseCounts = {};
+        const diseaseSupplements = {};
+
+        filtered.forEach(e => {
+            if (e.severity_pct !== null && e.severity_pct !== undefined) {
+                totalSev += parseFloat(e.severity_pct);
+                sevCount++;
+            }
+            if (e.status === 'diagnosed') {
+                diseaseCounts[e.disease] = (diseaseCounts[e.disease] || 0) + 1;
+                if (e.supplement) {
+                    diseaseSupplements[e.disease] = e.supplement;
+                }
+            }
+        });
+
+        // Update Severity
+        if (sevCount > 0) {
+            const avg = (totalSev / sevCount).toFixed(1);
+            const sevEl = document.getElementById('report-avg-severity');
+            sevEl.textContent = avg + '%';
+            sevEl.style.color = avg > 40 ? '#ef4444' : avg > 15 ? '#f59e0b' : '#22c55e';
+        } else {
+            document.getElementById('report-avg-severity').textContent = '0%';
+        }
+
+        // Update Dominant Disease
+        const sortedDiseases = Object.entries(diseaseCounts).sort((a, b) => b[1] - a[1]);
+        if (sortedDiseases.length > 0) {
+            const dominant = sortedDiseases[0][0];
+            const count = sortedDiseases[0][1];
+            document.getElementById('report-dominant-disease').textContent = dominant;
+            document.getElementById('report-dominant-count').textContent = `${count} of ${filtered.length} samples show this condition`;
+            
+            const rec = diseaseSupplements[dominant];
+            document.getElementById('report-recommendation').textContent = rec ? `Apply ${rec} across affected areas.` : 'Standard care recommended.';
+        } else {
+            document.getElementById('report-dominant-disease').textContent = 'Healthy Field';
+            document.getElementById('report-dominant-count').textContent = '0 diseased samples detected';
+            document.getElementById('report-recommendation').textContent = 'Maintain current watering and fertilizing schedule.';
+        }
+    }
+
+    // Initial render
+    document.addEventListener('DOMContentLoaded', renderJournal);
+</script>
+
+{% endblock body %}

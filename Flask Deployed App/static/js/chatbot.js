@@ -21,10 +21,21 @@
             chatInput.focus();
             // Show welcome message if first open
             if (chatMessages.children.length === 0) {
-                addBotMessage(
-                    "Hello! 🌿 I'm your **AI Plant Assistant**.\n\nAsk me about plant diseases, prevention steps, or supplement recommendations!",
-                    ['What diseases affect tomato?', 'Show all crops', 'Help']
-                );
+                const lang = (window.i18n && window.i18n.getCurrentLang()) || 'en';
+                const defaultMsg = "Hello! 🌿 I'm your **AI Plant Assistant**.\n\nAsk me about plant diseases, prevention steps, or supplement recommendations!";
+                const suggestions = ['What diseases affect tomato?', 'Show all crops', 'Help'];
+                
+                if (lang === 'en') {
+                    addBotMessage(defaultMsg, suggestions);
+                } else {
+                    showTyping();
+                    translateText(defaultMsg, lang).then(translatedMsg => {
+                        Promise.all(suggestions.map(s => translateText(s, lang))).then(translatedSugs => {
+                            hideTyping();
+                            addBotMessage(translatedMsg, translatedSugs);
+                        });
+                    });
+                }
             }
         }
     });
@@ -42,7 +53,20 @@
         }
     });
 
-    function sendMessage() {
+    async function translateText(text, targetLang) {
+        if (!text || targetLang === 'en') return text;
+        try {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+            const res = await fetch(url);
+            const json = await res.json();
+            return json[0].map(item => item[0]).join('');
+        } catch (e) {
+            console.error('Translation failed:', e);
+            return text; // fallback to original
+        }
+    }
+
+    async function sendMessage() {
         const text = chatInput.value.trim();
         if (!text) return;
 
@@ -50,24 +74,47 @@
         chatInput.value = '';
         showTyping();
 
+        const lang = (window.i18n && window.i18n.getCurrentLang()) || 'en';
+        
+        // Translate user message to English so the backend keyword matching works
+        let englishMsg = text;
+        if (lang !== 'en') {
+            englishMsg = await translateText(text, 'en');
+        }
+
         fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
+            body: JSON.stringify({ message: englishMsg })
         })
             .then(res => res.json())
-            .then(data => {
+            .then(async data => {
+                let finalReply = data.reply;
+                let finalSuggestions = data.suggestions || [];
+
+                // Translate backend reply back to user's language
+                if (lang !== 'en') {
+                    finalReply = await translateText(data.reply, lang);
+                    
+                    // Translate suggestions too
+                    for (let i = 0; i < finalSuggestions.length; i++) {
+                        finalSuggestions[i] = await translateText(finalSuggestions[i], lang);
+                    }
+                }
+
                 hideTyping();
-                addBotMessage(data.reply, data.suggestions || []);
+                addBotMessage(finalReply, finalSuggestions);
                 
                 // If voice read-aloud is enabled, speak the response
                 if (window.voiceAssistant && window.voiceAssistant.speakEnabled) {
-                    window.voiceAssistant.speak(data.reply.replace(/\*\*/g, '').replace(/[🌿🤖🔍💊🛡️🌱🍂🤔•]/g, ''));
+                    window.voiceAssistant.speak(finalReply.replace(/\*\*/g, '').replace(/[🌿🤖🔍💊🛡️🌱🍂🤔•]/g, ''));
                 }
             })
-            .catch(() => {
+            .catch(async () => {
                 hideTyping();
-                addBotMessage("Sorry, something went wrong. Please try again.", []);
+                const errMsg = "Sorry, something went wrong. Please try again.";
+                const translatedErr = lang === 'en' ? errMsg : await translateText(errMsg, lang);
+                addBotMessage(translatedErr, []);
             });
     }
 

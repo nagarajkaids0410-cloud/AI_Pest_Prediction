@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% block pagetitle %}Disease Comparison{% endblock pagetitle %}
+{% block body %}
+
+<div class="row mb-5 text-center text-white">
+    <div class="col-lg-10 mx-auto">
+        <h1 class="display-4 page-title">
+            <i class="fa-solid fa-code-compare me-2"></i>Disease Comparison Tool
+        </h1>
+        <p class="lead page-subtitle">Compare two diseases side-by-side to understand key differences in symptoms, treatments, and severity.</p>
+    </div>
+</div>
+
+<!-- Disease Selectors -->
+<div class="row g-4 justify-content-center mb-4">
+    <div class="col-lg-5 col-md-6">
+        <div class="glass-card p-4">
+            <label class="fw-bold mb-2 d-block" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-virus me-2" style="color: #ef4444;"></i>Disease A
+            </label>
+            <select id="disease-a" class="form-select form-select-lg" onchange="updateComparison()">
+                <option value="" disabled selected>Select a disease...</option>
+                {% for d in diseases %}
+                <option value="{{ loop.index0 }}">{{ d }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-auto d-flex align-items-center">
+        <div class="text-white" style="font-size: 2rem; opacity: 0.7;">
+            <i class="fa-solid fa-arrows-left-right"></i>
+        </div>
+    </div>
+    <div class="col-lg-5 col-md-6">
+        <div class="glass-card p-4">
+            <label class="fw-bold mb-2 d-block" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-virus me-2" style="color: #f59e0b;"></i>Disease B
+            </label>
+            <select id="disease-b" class="form-select form-select-lg" onchange="updateComparison()">
+                <option value="" disabled selected>Select a disease...</option>
+                {% for d in diseases %}
+                <option value="{{ loop.index0 }}">{{ d }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Comparison Results (hidden by default) -->
+<div id="comparison-results" class="row g-4 justify-content-center pb-5" style="display: none;">
+    
+    <!-- Disease A Detail -->
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100" id="card-a">
+            <div class="text-center mb-3">
+                <img id="img-a" src="" class="img-fluid rounded shadow-sm" style="max-height: 200px; object-fit: contain;" alt="Disease A">
+            </div>
+            <h4 id="name-a" class="fw-bold text-center mb-3" style="color: var(--primary);"></h4>
+            
+            <div class="mb-3">
+                <h6 class="fw-bold" style="color: var(--primary-dark);">
+                    <i class="fa-solid fa-circle-info text-primary me-2"></i>Description
+                </h6>
+                <p id="desc-a" class="text-muted small" style="line-height: 1.6;"></p>
+            </div>
+            
+            <div class="mb-3">
+                <h6 class="fw-bold" style="color: var(--primary-dark);">
+                    <i class="fa-solid fa-shield-virus text-danger me-2"></i>Prevention Steps
+                </h6>
+                <p id="prevent-a" class="text-muted small" style="line-height: 1.6;"></p>
+            </div>
+
+            <hr style="opacity: 0.1;">
+            
+            <div class="d-flex align-items-center gap-3 p-3 rounded" style="background: rgba(46, 204, 113, 0.08);">
+                <img id="supp-img-a" src="" class="rounded" style="width: 60px; height: 60px; object-fit: contain;" alt="">
+                <div>
+                    <small class="text-muted">Recommended Treatment:</small>
+                    <h6 id="supp-name-a" class="fw-bold mb-1" style="color: var(--primary-dark);"></h6>
+                    <a id="supp-link-a" href="#" target="_blank" class="small text-decoration-none" style="color: var(--primary);">
+                        <i class="fa-solid fa-cart-shopping me-1"></i>Buy Product
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disease B Detail -->
+    <div class="col-lg-6">
+        <div class="glass-card p-4 h-100" id="card-b">
+            <div class="text-center mb-3">
+                <img id="img-b" src="" class="img-fluid rounded shadow-sm" style="max-height: 200px; object-fit: contain;" alt="Disease B">
+            </div>
+            <h4 id="name-b" class="fw-bold text-center mb-3" style="color: var(--primary);"></h4>
+            
+            <div class="mb-3">
+                <h6 class="fw-bold" style="color: var(--primary-dark);">
+                    <i class="fa-solid fa-circle-info text-primary me-2"></i>Description
+                </h6>
+                <p id="desc-b" class="text-muted small" style="line-height: 1.6;"></p>
+            </div>
+            
+            <div class="mb-3">
+                <h6 class="fw-bold" style="color: var(--primary-dark);">
+                    <i class="fa-solid fa-shield-virus text-danger me-2"></i>Prevention Steps
+                </h6>
+                <p id="prevent-b" class="text-muted small" style="line-height: 1.6;"></p>
+            </div>
+
+            <hr style="opacity: 0.1;">
+            
+            <div class="d-flex align-items-center gap-3 p-3 rounded" style="background: rgba(14, 165, 233, 0.08);">
+                <img id="supp-img-b" src="" class="rounded" style="width: 60px; height: 60px; object-fit: contain;" alt="">
+                <div>
+                    <small class="text-muted">Recommended Treatment:</small>
+                    <h6 id="supp-name-b" class="fw-bold mb-1" style="color: var(--primary-dark);"></h6>
+                    <a id="supp-link-b" href="#" target="_blank" class="small text-decoration-none" style="color: var(--primary);">
+                        <i class="fa-solid fa-cart-shopping me-1"></i>Buy Product
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Differences Summary -->
+    <div class="col-lg-12">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-3 text-center" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-table me-2"></i>Quick Comparison Table
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" style="font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: rgba(26, 122, 80, 0.08);">
+                            <th style="color: var(--primary-dark);">Attribute</th>
+                            <th id="th-a" style="color: #ef4444;"></th>
+                            <th id="th-b" style="color: #f59e0b;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prompt when no selection -->
+<div id="comparison-placeholder" class="text-center text-white py-5">
+    <i class="fa-solid fa-arrow-up-long" style="font-size: 3rem; opacity: 0.5;"></i>
+    <h5 class="mt-3" style="opacity: 0.7;">Select two diseases above to compare them</h5>
+    <p style="opacity: 0.5;">Great for distinguishing similar diseases like "Early Blight vs Late Blight"</p>
+</div>
+
+
+<script>
+    let diseaseData = null;
+
+    // Fetch disease data on load
+    fetch('/api/diseases')
+        .then(r => r.json())
+        .then(data => { diseaseData = data; })
+        .catch(err => console.error('Failed to load disease data:', err));
+
+    function updateComparison() {
+        const aIdx = document.getElementById('disease-a').value;
+        const bIdx = document.getElementById('disease-b').value;
+
+        if (!diseaseData || aIdx === '' || bIdx === '') return;
+
+        const a = diseaseData[parseInt(aIdx)];
+        const b = diseaseData[parseInt(bIdx)];
+
+        // Show results
+        document.getElementById('comparison-results').style.display = '';
+        document.getElementById('comparison-placeholder').style.display = 'none';
+
+        // Disease A
+        document.getElementById('img-a').src = a.image_url;
+        document.getElementById('name-a').textContent = a.name;
+        document.getElementById('desc-a').textContent = a.description;
+        document.getElementById('prevent-a').textContent = a.prevention;
+        document.getElementById('supp-img-a').src = a.supplement_image;
+        document.getElementById('supp-name-a').textContent = a.supplement_name;
+        document.getElementById('supp-link-a').href = a.buy_link;
+
+        // Disease B
+        document.getElementById('img-b').src = b.image_url;
+        document.getElementById('name-b').textContent = b.name;
+        document.getElementById('desc-b').textContent = b.description;
+        document.getElementById('prevent-b').textContent = b.prevention;
+        document.getElementById('supp-img-b').src = b.supplement_image;
+        document.getElementById('supp-name-b').textContent = b.supplement_name;
+        document.getElementById('supp-link-b').href = b.buy_link;
+
+        // Table headers
+        document.getElementById('th-a').textContent = a.name;
+        document.getElementById('th-b').textContent = b.name;
+
+        // Build comparison table
+        const tbody = document.getElementById('comparison-table-body');
+        const cropA = a.name.split(':')[0].split('_')[0].trim();
+        const cropB = b.name.split(':')[0].split('_')[0].trim();
+
+        tbody.innerHTML = `
+            <tr>
+                <td class="fw-bold">🌱 Crop</td>
+                <td>${cropA}</td>
+                <td>${cropB}</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">🏥 Status</td>
+                <td><span class="badge ${a.is_healthy ? 'bg-success' : 'bg-danger'}">${a.is_healthy ? 'Healthy' : 'Diseased'}</span></td>
+                <td><span class="badge ${b.is_healthy ? 'bg-success' : 'bg-danger'}">${b.is_healthy ? 'Healthy' : 'Diseased'}</span></td>
+            </tr>
+            <tr>
+                <td class="fw-bold">💊 Treatment</td>
+                <td>${a.supplement_name}</td>
+                <td>${b.supplement_name}</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">📝 Description Length</td>
+                <td>${a.description.length} chars</td>
+                <td>${b.description.length} chars</td>
+            </tr>
+        `;
+    }
+</script>
+
+{% endblock body %}

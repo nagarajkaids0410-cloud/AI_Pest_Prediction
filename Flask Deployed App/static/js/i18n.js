@@ -99,6 +99,16 @@
             // Voice
             'voice.listening': 'Listening...',
             'voice.speak': 'Click to speak',
+            
+            // New Features
+            'submit.listen': 'Listen to Diagnosis',
+            'submit.stop': 'Stop Listening',
+            'submit.diy_title': 'DIY Organic Alternative',
+            'submit.rotation_title': 'Natural Disease Control',
+            'submit.rotation_sub': 'Crop Rotation (Next Season)',
+            'submit.rotation_desc': 'To break the disease cycle in your soil, avoid planting the same family here next season.',
+            'submit.companion_sub': 'Companion Planting',
+            'submit.companion_desc': 'Plant these nearby to naturally deter pests and improve soil health.',
         },
 
         hi: {
@@ -182,6 +192,16 @@
             'chat.placeholder': 'पौधों की बीमारियों के बारे में पूछें...',
             'voice.listening': 'सुन रहा हूँ...',
             'voice.speak': 'बोलने के लिए क्लिक करें',
+
+            // New Features
+            'submit.listen': 'निदान सुनें',
+            'submit.stop': 'सुनना बंद करें',
+            'submit.diy_title': 'DIY जैविक विकल्प',
+            'submit.rotation_title': 'प्राकृतिक रोग नियंत्रण',
+            'submit.rotation_sub': 'फसल चक्र (अगले मौसम के लिए)',
+            'submit.rotation_desc': 'मिट्टी में रोग चक्र को तोड़ने के लिए, अगले मौसम में उसी परिवार का पौधा यहाँ लगाने से बचें।',
+            'submit.companion_sub': 'सहयोगी रोपण',
+            'submit.companion_desc': 'कीटों को दूर रखने और मिट्टी को बेहतर बनाने के लिए इन्हें पास में लगाएँ।',
         },
 
         kn: {
@@ -481,6 +501,9 @@
         if (window.voiceAssistant) {
             window.voiceAssistant.setLanguage(speechLangCodes[lang] || 'en-IN');
         }
+
+        // Fire event so pages with dynamic content can re-render
+        document.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: lang } }));
     }
 
     // Initialize

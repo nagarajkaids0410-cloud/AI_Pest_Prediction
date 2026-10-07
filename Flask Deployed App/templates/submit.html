@@ -2,16 +2,110 @@
 {% block pagetitle %}{{title}}{% endblock pagetitle %}
 {% block body %}
 
-<div class="row mb-5 text-center text-white">
+<div class="row mb-5 text-center text-white position-relative">
     <div class="col-lg-10 mx-auto">
         <h1 class="display-4 page-title">
             <i class="fa-solid fa-microscope me-2"></i><span data-i18n="submit.title">Analysis Result</span>
         </h1>
         <p class="lead page-subtitle" data-i18n="submit.subtitle">Here is what our AI detected.</p>
+        
+        <!-- Voice Agronomist Button -->
+        <button id="btn-speak" class="btn btn-light rounded-pill shadow-sm mt-3 px-4 py-2 fw-bold" onclick="speakDiagnosis()" style="color: var(--primary-dark); transition: transform 0.2s;">
+            <i class="fa-solid fa-volume-high me-2" style="color: var(--primary);"></i><span data-i18n="submit.listen">Listen to Diagnosis</span>
+        </button>
     </div>
 </div>
 
-<div class="row g-4 justify-content-center pb-5">
+<!-- ── Confidence Badge + Severity Row ────────────────────────────────────── -->
+<div class="row g-4 justify-content-center pb-4">
+    <!-- Confidence Score Card -->
+    <div class="col-lg-4 col-md-6">
+        <div class="glass-card p-4 text-center h-100">
+            <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-bullseye me-2" style="color: #0ea5e9;"></i>AI Confidence
+            </h5>
+            <div class="confidence-ring-container mb-3">
+                <svg viewBox="0 0 120 120" class="confidence-ring" style="width: 140px; height: 140px;">
+                    <circle cx="60" cy="60" r="52" fill="none" stroke="#e8f5e9" stroke-width="10"/>
+                    <circle cx="60" cy="60" r="52" fill="none"
+                            stroke="url(#confGrad)" stroke-width="10"
+                            stroke-dasharray="{{ (confidence / 100) * 326.7 }} 326.7"
+                            stroke-linecap="round"
+                            transform="rotate(-90 60 60)"
+                            class="conf-progress"/>
+                    <defs>
+                        <linearGradient id="confGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#1a7a50"/>
+                            <stop offset="100%" style="stop-color:#2ecc71"/>
+                        </linearGradient>
+                    </defs>
+                    <text x="60" y="55" text-anchor="middle" font-size="22" font-weight="700" fill="#1a7a50">{{confidence}}%</text>
+                    <text x="60" y="72" text-anchor="middle" font-size="9" fill="#6b7280">CONFIDENCE</text>
+                </svg>
+            </div>
+            <h5 class="fw-bold" style="color: var(--primary);">{{title}}</h5>
+        </div>
+    </div>
+
+    <!-- Top-3 Predictions Chart -->
+    <div class="col-lg-4 col-md-6">
+        <div class="glass-card p-4 h-100">
+            <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-chart-bar me-2" style="color: #f59e0b;"></i>Top-3 Predictions
+            </h5>
+            <div id="top3-chart" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Severity Gauge (only for diseased) OR Grad-CAM Heatmap -->
+    {% if severity_pct is not none %}
+    <div class="col-lg-4 col-md-6">
+        <div class="glass-card p-4 text-center h-100">
+            <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-gauge-high me-2" style="color: {% if severity_label == 'Severe' %}#ef4444{% elif severity_label == 'Moderate' %}#f59e0b{% else %}#22c55e{% endif %};"></i>Disease Severity
+            </h5>
+            <div class="severity-gauge-container mb-3">
+                <svg viewBox="0 0 200 120" style="width: 200px; height: 120px;">
+                    <!-- Background arc -->
+                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-linecap="round"/>
+                    <!-- Severity arc -->
+                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none"
+                          stroke="url(#sevGrad)" stroke-width="14" stroke-linecap="round"
+                          stroke-dasharray="{{ (severity_pct / 100) * 251.3 }} 251.3"/>
+                    <defs>
+                        <linearGradient id="sevGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#22c55e"/>
+                            <stop offset="50%" style="stop-color:#f59e0b"/>
+                            <stop offset="100%" style="stop-color:#ef4444"/>
+                        </linearGradient>
+                    </defs>
+                    <text x="100" y="85" text-anchor="middle" font-size="28" font-weight="700"
+                          fill="{% if severity_label == 'Severe' %}#ef4444{% elif severity_label == 'Moderate' %}#f59e0b{% else %}#22c55e{% endif %}">
+                        {{severity_pct}}%
+                    </text>
+                    <text x="100" y="105" text-anchor="middle" font-size="13" font-weight="600"
+                          fill="{% if severity_label == 'Severe' %}#ef4444{% elif severity_label == 'Moderate' %}#f59e0b{% else %}#22c55e{% endif %}">
+                        {{severity_label}}
+                    </text>
+                </svg>
+            </div>
+            <p class="text-muted small mb-0">
+                {% if severity_label == 'Mild' %}
+                Early stage — organic treatment recommended
+                {% elif severity_label == 'Moderate' %}
+                Spreading — apply targeted treatment soon
+                {% else %}
+                Advanced infection — immediate action needed
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+<!-- ── Main Results Row ──────────────────────────────────────────────────── -->
+<div class="row g-4 justify-content-center pb-4">
     
     <!-- Uploaded Image Card -->
     <div class="col-lg-4 col-md-6">
@@ -23,6 +117,24 @@
             <h4 class="fw-bold mt-auto" style="color: var(--primary);">{{title}}</h4>
         </div>
     </div>
+
+    <!-- Grad-CAM Heatmap Card -->
+    {% if heatmap_url %}
+    <div class="col-lg-4 col-md-6">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column align-items-center">
+            <h5 class="fw-bold mb-4" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-fire me-2" style="color: #ef4444;"></i>AI Attention Heatmap
+            </h5>
+            <div class="d-flex align-items-center justify-content-center mb-3 shadow-sm rounded overflow-hidden bg-white p-2" style="width: 100%; height: 260px;">
+                <img src="{{heatmap_url}}" class="img-fluid rounded" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Grad-CAM Heatmap">
+            </div>
+            <p class="text-muted small mb-0">
+                <i class="fa-solid fa-info-circle me-1"></i>
+                Red/yellow regions show where the AI focused to make its diagnosis
+            </p>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Description & Tips Card -->
     <div class="col-lg-4 col-md-6">
@@ -48,10 +160,13 @@
             <p class="text-muted mb-0" style="font-size: 0.95rem; line-height: 1.6;">{{prevent}}</p>
         </div>
     </div>
+</div>
 
-    <!-- Supplement Recommendation (Hidden for index 4, assuming background without leaf) -->
-    {% if pred != 4 %}
-    <div class="col-lg-4 col-md-12">
+
+<!-- ── Supplement Recommendation Row ─────────────────────────────────────── -->
+{% if pred != 4 %}
+<div class="row g-4 justify-content-center pb-5">
+    <div class="col-lg-4 col-md-6">
         <div class="glass-card p-4 text-center h-100 d-flex flex-column">
             <h5 class="fw-bold mb-4" style="color: var(--primary-dark);">
                 {% if pred==3 or pred==5 or pred==7 or pred==11 or pred==15 or pred==18 or pred==20 or pred==23 or pred==24 or pred==25 or pred==28 or pred==38 %}
@@ -67,13 +182,483 @@
             
             <h6 class="fw-bold mb-3 text-muted">{{sname}}</h6>
             
-            <a target="_blank" href="{{buy_link}}" class="btn btn-gradient w-100 rounded-pill py-2 mt-auto">
-                <i class="fa-solid fa-cart-shopping me-2"></i><span data-i18n="submit.buy">Buy Product</span>
+            <a target="_blank" href="{{buy_link}}" class="btn btn-gradient w-100 rounded-pill py-2 mt-auto mb-3">
+                <i class="fa-solid fa-cart-shopping me-2"></i><span data-i18n="submit.buy">Buy Commercial Product</span>
             </a>
+
+            <!-- DIY Organic Remedy Section -->
+            <hr style="opacity: 0.1;">
+            <div class="text-start mt-2">
+                <h6 class="fw-bold mb-2" style="color: #22c55e;"><i class="fa-solid fa-leaf me-2"></i><span data-i18n="submit.diy_title">DIY Organic Alternative</span></h6>
+                <div id="diy-recipe" class="p-3 rounded small" style="background: rgba(34,197,94,0.08); border-left: 3px solid #22c55e; color: #166534;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
         </div>
     </div>
-    {% endif %}
 
+    <!-- Save to Journal CTA -->
+    <div class="col-lg-4 col-md-6">
+        <div class="glass-card p-4 text-center h-100 d-flex flex-column justify-content-center align-items-center">
+            <i class="fa-solid fa-book-medical mb-3" style="font-size: 3rem; color: var(--secondary);"></i>
+            <h5 class="fw-bold mb-2" style="color: var(--primary-dark);">Save & Export</h5>
+            <p class="text-muted small mb-4">Track this diagnosis in your journal or export it as a professional PDF report.</p>
+            
+            <div class="d-flex flex-column gap-2 w-100">
+                <button class="btn btn-gradient rounded-pill px-4 py-2 w-100" id="save-to-journal-btn" onclick="saveToJournal()">
+                    <i class="fa-solid fa-plus me-2"></i>Add to My Garden
+                </button>
+                <button class="btn rounded-pill px-4 py-2 w-100" style="background: rgba(14,165,233,0.1); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.3);" onclick="downloadPDF()">
+                    <i class="fa-solid fa-file-pdf me-2"></i>Download PDF Report
+                </button>
+            </div>
+
+            <div id="journal-save-feedback" class="mt-3" style="display: none;">
+                <span class="badge rounded-pill" style="background: var(--secondary); padding: 8px 16px;">
+                    <i class="fa-solid fa-check me-1"></i> Saved! <a href="/journal" class="text-white text-decoration-underline">View Journal</a>
+                </span>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- ── Economic Impact Estimator ─────────────────────────────────────────── -->
+{% if severity_pct is not none %}
+<div class="row justify-content-center pb-5">
+    <div class="col-lg-8">
+        <div class="glass-card p-4">
+            <h4 class="fw-bold mb-3 text-center" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-calculator me-2" style="color: #f59e0b;"></i>Economic Impact Estimator
+            </h4>
+            <p class="text-center text-muted small mb-4">Estimate potential yield loss and treatment ROI based on the current severity level ({{severity_pct}}%).</p>
+            
+            <div class="row g-4 align-items-center">
+                <div class="col-md-5">
+                    <label class="form-label fw-bold" style="color: var(--primary-dark);">Farm Size (Acres)</label>
+                    <input type="number" id="farm-size" class="form-control form-control-lg mb-3" placeholder="e.g., 5" value="1" min="0.1" step="0.1">
+                    
+                    <label class="form-label fw-bold" style="color: var(--primary-dark);">Expected Yield Value (₹ per Acre)</label>
+                    <input type="number" id="yield-value" class="form-control form-control-lg mb-3" placeholder="e.g., 50000" value="50000" min="1000" step="1000">
+                    
+                    <button class="btn btn-gradient w-100 rounded-pill" onclick="calculateEconomics()">Calculate ROI</button>
+                </div>
+                
+                <div class="col-md-7">
+                    <div class="p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Estimated Yield Loss (if untreated):</span>
+                            <span class="fw-bold text-danger" id="est-loss">₹-</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Estimated Treatment Cost:</span>
+                            <span class="fw-bold text-warning" id="est-cost">₹-</span>
+                        </div>
+                        <hr class="my-2" style="opacity: 0.1;">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold" style="color: var(--primary-dark);">Net Savings (ROI):</span>
+                            <span class="fw-bold text-success fs-5" id="est-savings">₹-</span>
+                        </div>
+                        <p class="small text-muted mt-3 mb-0"><i class="fa-solid fa-circle-info me-1"></i>Based on a generic model assuming {{severity_pct}}% severity correlates to {{ (severity_pct * 0.6) | round(1) }}% yield loss and average treatment cost of ₹1500/acre.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Crop Rotation & Companion Planting ────────────────────────────────── -->
+<div class="row justify-content-center pb-5">
+    <div class="col-lg-8">
+        <div class="glass-card p-4">
+            <h4 class="fw-bold mb-4 text-center" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-arrows-rotate me-2" style="color: #22c55e;"></i><span data-i18n="submit.rotation_title">Natural Disease Control</span>
+            </h4>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="p-4 rounded h-100" style="background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.2);">
+                        <h6 class="fw-bold" style="color: #166534;"><i class="fa-solid fa-sync me-2"></i><span data-i18n="submit.rotation_sub">Crop Rotation (Next Season)</span></h6>
+                        <p class="small text-muted mb-3" data-i18n="submit.rotation_desc">To break the disease cycle in your soil, avoid planting the same family here next season.</p>
+                        <div id="rotation-advice" class="fw-bold text-dark small">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-4 rounded h-100" style="background: rgba(14,165,233,0.05); border: 1px solid rgba(14,165,233,0.2);">
+                        <h6 class="fw-bold" style="color: #0369a1;"><i class="fa-solid fa-leaf me-2"></i><span data-i18n="submit.companion_sub">Companion Planting</span></h6>
+                        <p class="small text-muted mb-3" data-i18n="submit.companion_desc">Plant these nearby to naturally deter pests and improve soil health.</p>
+                        <div id="companion-advice" class="fw-bold text-dark small">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+
+<!-- ── Top-3 Chart Script ────────────────────────────────────────────────── -->
+<style>
+    .conf-progress {
+        animation: confDraw 1.5s ease-out forwards;
+    }
+    @keyframes confDraw {
+        from { stroke-dasharray: 0 326.7; }
+    }
+    .top3-bar-bg {
+        background: #e8f5e9;
+        border-radius: 8px;
+        overflow: hidden;
+        height: 32px;
+        position: relative;
+        margin-bottom: 14px;
+    }
+    .top3-bar-fill {
+        height: 100%;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: white;
+        white-space: nowrap;
+        transition: width 1.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .top3-bar-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 4px;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    // Top-3 Predictions Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        // Run initial calculation for economics if present
+        if (typeof calculateEconomics === 'function') {
+            calculateEconomics();
+        }
+
+        // Run rotation advice
+        if (typeof setRotationAdvice === 'function') {
+            setRotationAdvice('{{title}}');
+        }
+
+        // Run DIY recipe
+        if (typeof generateDIYRecipe === 'function') {
+            generateDIYRecipe('{{title}}');
+        }
+
+        // Listen for language changes to re-render dynamic content
+        document.addEventListener('languageChanged', function() {
+            if (typeof setRotationAdvice === 'function') setRotationAdvice('{{title}}');
+            if (typeof generateDIYRecipe === 'function') generateDIYRecipe('{{title}}');
+        });
+
+        const names = {{ top3_names | safe }};
+        const probs = {{ top3_probs | safe }};
+        const colors = [
+            'linear-gradient(135deg, #1a7a50, #2ecc71)',
+            'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+            'linear-gradient(135deg, #8b5cf6, #a78bfa)'
+        ];
+
+        const container = document.getElementById('top3-chart');
+        if (!container) return;
+
+        names.forEach((name, i) => {
+            const label = document.createElement('div');
+            label.className = 'top3-bar-label';
+            label.textContent = name;
+
+            const barBg = document.createElement('div');
+            barBg.className = 'top3-bar-bg';
+
+            const barFill = document.createElement('div');
+            barFill.className = 'top3-bar-fill';
+            barFill.style.background = colors[i];
+            barFill.style.width = '0%';
+            barFill.textContent = probs[i] + '%';
+
+            barBg.appendChild(barFill);
+            container.appendChild(label);
+            container.appendChild(barBg);
+
+            // Animate
+            setTimeout(() => {
+                barFill.style.width = Math.max(probs[i], 8) + '%';
+            }, 300 + i * 200);
+        });
+    });
+
+    // Save to Journal
+    function saveToJournal() {
+        const entry = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            disease: '{{title}}',
+            confidence: {{confidence}},
+            severity_pct: {{ severity_pct if severity_pct is not none else 'null' }},
+            severity_label: '{{ severity_label if severity_label else "" }}',
+            image_url: '{{image_url}}',
+            heatmap_url: '{{ heatmap_url if heatmap_url else "" }}',
+            supplement: '{{sname}}',
+            buy_link: '{{buy_link}}',
+            notes: '',
+            status: '{{ "healthy" if pred in [3,5,7,11,15,18,20,23,24,25,28,38] else "diagnosed" }}'
+        };
+
+        let journal = JSON.parse(localStorage.getItem('plantJournal') || '[]');
+        journal.unshift(entry);
+        localStorage.setItem('plantJournal', JSON.stringify(journal));
+
+        document.getElementById('save-to-journal-btn').style.display = 'none';
+        document.getElementById('journal-save-feedback').style.display = 'block';
+    }
+
+    // PDF Export
+    function downloadPDF() {
+        // Prepare the container we want to capture
+        // We'll capture the entire body block basically, but we'll wrap it temporarily
+        const element = document.createElement('div');
+        element.innerHTML = `
+            <div style="padding: 20px; font-family: sans-serif;">
+                <h1 style="color: #1a7a50; text-align: center; margin-bottom: 5px;">AI Plant Engine - Diagnostic Report</h1>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">Generated on: ${new Date().toLocaleDateString()}</p>
+                
+                <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+                    <div style="flex: 1; border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+                        <h3 style="color: #333; margin-top: 0;">Analyzed Image</h3>
+                        <img src="{{image_url}}" style="width: 100%; max-height: 300px; object-fit: contain;">
+                    </div>
+                    {% if heatmap_url %}
+                    <div style="flex: 1; border: 1px solid #eee; padding: 15px; border-radius: 8px;">
+                        <h3 style="color: #333; margin-top: 0;">AI Heatmap</h3>
+                        <img src="{{heatmap_url}}" style="width: 100%; max-height: 300px; object-fit: contain;">
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h2 style="color: #1a7a50; margin-top: 0;">Diagnosis: {{title}}</h2>
+                    <p><strong>Confidence:</strong> {{confidence}}%</p>
+                    {% if severity_pct is not none %}
+                    <p><strong>Severity:</strong> {{severity_pct}}% (${'{{severity_label}}'})</p>
+                    {% endif %}
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #333; border-bottom: 2px solid #1a7a50; padding-bottom: 5px;">Description</h3>
+                    <p style="color: #555; line-height: 1.6;">{{desc}}</p>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #333; border-bottom: 2px solid #1a7a50; padding-bottom: 5px;">Prevention & Treatment Steps</h3>
+                    <p style="color: #555; line-height: 1.6;">{{prevent}}</p>
+                </div>
+
+                {% if pred != 4 %}
+                <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; border: 1px solid #bbf7d0;">
+                    <h3 style="color: #166534; margin-top: 0;">Recommended Product</h3>
+                    <p><strong>{{sname}}</strong></p>
+                    <p style="font-size: 0.9em; color: #166534;">Purchase link available in the online web app.</p>
+                </div>
+                {% endif %}
+            </div>
+        `;
+
+        const opt = {
+            margin:       0.5,
+            filename:     'Plant_Diagnosis_Report_{{title|replace(" ", "_")}}.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Trigger download
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // Economic Impact Calculator
+    function calculateEconomics() {
+        const severityPct = parseFloat('{{ severity_pct if severity_pct is not none else "0" }}');
+        if (severityPct === 0) return;
+
+        const acres = parseFloat(document.getElementById('farm-size').value) || 0;
+        const yieldValuePerAcre = parseFloat(document.getElementById('yield-value').value) || 0;
+
+        // Model: Severity % * 0.6 = Yield Loss %
+        // E.g., 50% severity -> 30% yield loss
+        let yieldLossPct = (severityPct * 0.6) / 100;
+        // Cap max loss at 90%
+        if (yieldLossPct > 0.9) yieldLossPct = 0.9;
+
+        const totalValue = acres * yieldValuePerAcre;
+        const lossAmount = totalValue * yieldLossPct;
+
+        // Assume avg treatment cost is ₹1500 / acre
+        const treatmentCost = acres * 1500;
+        
+        let savings = lossAmount - treatmentCost;
+        if (savings < 0) savings = 0; // Don't show negative savings if treatment is more than loss
+
+        document.getElementById('est-loss').textContent = '₹' + lossAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('est-cost').textContent = '₹' + treatmentCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('est-savings').textContent = '₹' + savings.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    // Crop Rotation & Companion Advice Logic
+    function setRotationAdvice(diseaseTitle) {
+        const titleLower = diseaseTitle.toLowerCase();
+        let rotation = "";
+        let companion = "";
+        
+        const lang = (window.i18n && window.i18n.getCurrentLang()) || 'en';
+
+        if (titleLower.includes('tomato') || titleLower.includes('potato') || titleLower.includes('pepper')) {
+            rotation = lang === 'hi' ? "बीन्स, मटर, या गोभी उगाएं। अगले 3 वर्षों तक यहाँ टमाटर/आलू न लगाएँ।" : "Rotate to: Legumes (Beans, Peas), Brassicas (Cabbage, Broccoli), or Alliums (Onions, Garlic). Do not plant other Nightshades here for 3 years.";
+            companion = lang === 'hi' ? "गेंदा (मैरीगोल्ड) या तुलसी लगाएँ ताकि कीट दूर रहें।" : "Plant with: Basil (repels hornworms), Marigolds (deters nematodes), or Nasturtiums (trap crop for aphids).";
+        } else if (titleLower.includes('corn')) {
+            rotation = lang === 'hi' ? "मिट्टी में नाइट्रोजन वापस लाने के लिए सोयाबीन या फलियां उगाएं।" : "Rotate to: Soybeans, Legumes, or broadleaf cover crops to fix nitrogen back into the depleted soil.";
+            companion = lang === 'hi' ? "बीन्स और कद्दू (स्क्वैश) या सूरजमुखी को साथ लगाएँ।" : "Plant with: Beans and Squash (The 'Three Sisters' method), or Sunflowers to draw away pests.";
+        } else if (titleLower.includes('apple') || titleLower.includes('cherry') || titleLower.includes('peach') || titleLower.includes('citrus') || titleLower.includes('orange')) {
+            rotation = lang === 'hi' ? "पेड़ों के नीचे क्लोवर या राई घास लगाएँ ताकि मिट्टी स्वस्थ रहे।" : "Orchard/Tree Crop. Rotation is not applicable. Focus on orchard floor management: plant cover crops like Clover or Rye grass to suppress weeds and improve soil biology.";
+            companion = lang === 'hi' ? "लहसुन या चाइव्स (लहसुनी घास) को पास में लगाएँ।" : "Plant understory with: Garlic, Chives, or Comfrey to deter borers and accumulate deep nutrients.";
+        } else if (titleLower.includes('grape')) {
+            rotation = lang === 'hi' ? "अंगूर के बीच सरसों या क्लोवर लगाएँ ताकि नमी बनी रहे।" : "Vineyard. Rotation not applicable. Use cover crops between rows (e.g., Mustard, Oats, or Clover) to manage soil moisture and prevent erosion.";
+            companion = lang === 'hi' ? "क्लोवर या पुदीना पास में लगाएँ।" : "Plant with: Hyssop, Oregano, or Clover. Avoid planting near cabbage or radishes.";
+        } else if (titleLower.includes('squash')) {
+            rotation = lang === 'hi' ? "मक्का, बीन्स या गाजर उगाएं।" : "Rotate to: Corn, Beans, or Root vegetables (Carrots, Radishes).";
+            companion = lang === 'hi' ? "गेंदा (मैरीगोल्ड) या बीन्स को साथ लगाएँ।" : "Plant with: Corn, Beans, Radishes (deters squash bugs), or Marigolds.";
+        } else {
+            rotation = lang === 'hi' ? "सामान्य नियम: पत्तेदार, जड़ वाली फसलें, और फलियों के बीच फसल चक्र अपनाएं।" : "General Rule: Rotate between Leafy greens, Root crops, Legumes (Beans/Peas), and Fruiting crops year over year.";
+            companion = lang === 'hi' ? "सामान्य नियम: गेंदा, लहसुन, और तुलसी कई सामान्य कीटों को रोकते हैं।" : "General Companions: Marigolds, Alliums (Onions/Garlic), and aromatic herbs (Basil, Mint) deter many common pests.";
+        }
+
+        const rotEl = document.getElementById('rotation-advice');
+        const compEl = document.getElementById('companion-advice');
+        if (rotEl) rotEl.textContent = rotation;
+        if (compEl) compEl.textContent = companion;
+    }
+
+    // DIY Organic Remedy Logic
+    function generateDIYRecipe(diseaseTitle) {
+        const titleLower = diseaseTitle.toLowerCase();
+        let recipe = "";
+        const lang = (window.i18n && window.i18n.getCurrentLang()) || 'en';
+
+        if (titleLower.includes('blight') || titleLower.includes('mildew') || titleLower.includes('rust') || titleLower.includes('mold') || titleLower.includes('scab') || titleLower.includes('fungi')) {
+            recipe = lang === 'hi' ? 
+                "<strong>बेकिंग सोडा कवकनाशी:</strong> 1 बड़ा चम्मच बेकिंग सोडा, 1 चम्मच हल्का साबुन, और 1 गैलन पानी मिलाएं। पौधे पर स्प्रे करें।" : 
+                "<strong>Baking Soda Fungicide:</strong> Mix 1 tablespoon of baking soda, 1 teaspoon of mild liquid soap, and 1 gallon of water. Spray thoroughly on all plant surfaces. The alkaline nature disrupts fungal spores.";
+        } else if (titleLower.includes('bacteri')) {
+            recipe = lang === 'hi' ? 
+                "<strong>लहसुन और तांबा स्प्रे:</strong> लहसुन की 2 कलियों को पीसकर पानी में रात भर रखें। छान लें और 1 गैलन पानी में थोड़ा साबुन मिलाकर स्प्रे करें।" : 
+                "<strong>Garlic & Copper Spray:</strong> Blend 2 entire heads of garlic with a little water, let it sit overnight. Strain and add to 1 gallon of water with a drop of dish soap. Garlic has powerful natural antibacterial properties.";
+        } else if (titleLower.includes('virus') || titleLower.includes('mosaic')) {
+            recipe = lang === 'hi' ? 
+                "<strong>कोई इलाज नहीं:</strong> वायरस का कोई इलाज नहीं है। संक्रमित पौधों को तुरंत हटाकर नष्ट कर दें ताकि यह फैले नहीं।" : 
+                "<strong>No Cure:</strong> Viruses cannot be cured. Immediately remove and destroy infected plants (do not compost). To prevent spread, wipe pruning shears with a 10% bleach solution or rubbing alcohol.";
+        } else if (titleLower.includes('mite') || titleLower.includes('pest') || titleLower.includes('bug')) {
+            recipe = lang === 'hi' ? 
+                "<strong>नीम का तेल कीटनाशक:</strong> 2 चम्मच नीम का तेल, 1 चम्मच तरल साबुन, और 1 चौथाई पानी मिलाएं। सुबह या शाम को स्प्रे करें।" : 
+                "<strong>Neem Oil Insecticide:</strong> Mix 2 teaspoons of cold-pressed neem oil, 1 teaspoon of liquid soap, and 1 quart of water. Spray at dawn or dusk. This disrupts the pest life cycle.";
+        } else if (titleLower.includes('healthy')) {
+            recipe = lang === 'hi' ? 
+                "<strong>कम्पोस्ट चाय:</strong> अपने पौधे को मजबूत रखें! खाद को 24 घंटे पानी में भिगोकर रखें और उस पानी को पौधे की जड़ों में डालें।" : 
+                "<strong>Kelp or Compost Tea:</strong> Keep your plant strong! Steep compost in a bucket of water for 24 hours, strain, and water the base of the plant to boost soil biology and plant immunity.";
+        } else {
+            recipe = lang === 'hi' ? 
+                "<strong>नीम का तेल और साबुन:</strong> 1 बड़ा चम्मच नीम का तेल और 1 चम्मच डिश सोप को 1 गैलन पानी में मिलाएं। बचाव के रूप में साप्ताहिक प्रयोग करें।" : 
+                "<strong>Neem Oil & Soap:</strong> A general-purpose organic spray. Mix 1 tbsp of Neem Oil and 1 tsp of mild dish soap into 1 gallon of water. Apply weekly as a preventative measure.";
+        }
+
+        const diyEl = document.getElementById('diy-recipe');
+        if (diyEl) diyEl.innerHTML = recipe;
+    }
+
+    // Voice Agronomist (Text-to-Speech)
+    let isSpeaking = false;
+    function speakDiagnosis() {
+        if (!('speechSynthesis' in window)) {
+            alert("Sorry, your browser doesn't support text-to-speech.");
+            return;
+        }
+
+        const synth = window.speechSynthesis;
+        const lang = (window.i18n && window.i18n.getCurrentLang()) || 'en';
+        const listenText = lang === 'hi' ? 'निदान सुनें' : 'Listen to Diagnosis';
+        const stopText = lang === 'hi' ? 'सुनना बंद करें' : 'Stop Listening';
+        
+        if (isSpeaking) {
+            synth.cancel();
+            isSpeaking = false;
+            document.getElementById('btn-speak').innerHTML = `<i class="fa-solid fa-volume-high me-2" style="color: var(--primary);"></i><span data-i18n="submit.listen">${listenText}</span>`;
+            return;
+        }
+
+        const disease = '{{title}}';
+        const conf = '{{confidence}}';
+        let severity = '{{severity_label}}';
+        if (!severity || severity === 'None') severity = lang === 'hi' ? "गंभीर नहीं" : "not severe";
+
+        let text = "";
+        
+        if (lang === 'hi') {
+            text = `नमस्ते। मैं आपका ए आई सहायक हूँ। मैंने आपके पौधे का विश्लेषण किया है। `;
+            if (disease.toLowerCase().includes('healthy')) {
+                text += `अच्छी खबर! आपका पौधा ${disease} लग रहा है, और मुझे ${conf} प्रतिशत यकीन है। बहुत बढ़िया!`;
+            } else {
+                text += `मुझे ${disease} का पता चला है, और मुझे ${conf} प्रतिशत यकीन है। अभी बीमारी का स्तर ${severity} है। `;
+                const diyEl = document.getElementById('diy-recipe');
+                if (diyEl && diyEl.textContent) {
+                    text += `जैविक उपचार के लिए, मेरा सुझाव है: ${diyEl.textContent.replace(/<[^>]*>?/gm, '')}`;
+                }
+            }
+        } else {
+            text = `Hello. I am your A I Agronomist. I have analyzed your plant leaf. `;
+            if (disease.toLowerCase().includes('healthy')) {
+                text += `Great news! Your plant appears to be ${disease} with a confidence of ${conf} percent. Keep up the good work!`;
+            } else {
+                text += `I have detected ${disease} with a confidence of ${conf} percent. The current severity level is estimated to be ${severity}. `;
+                const diyEl = document.getElementById('diy-recipe');
+                if (diyEl && diyEl.textContent) {
+                    text += `For an organic treatment, I recommend the following: ${diyEl.textContent.replace(/<[^>]*>?/gm, '')}`;
+                }
+            }
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        let voices = synth.getVoices();
+        if (lang === 'hi') {
+            utterance.voice = voices.find(v => v.lang.includes('hi') || v.lang.includes('in')) || voices[0];
+            utterance.lang = 'hi-IN';
+        } else {
+            utterance.voice = voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB') || voices[0];
+            utterance.lang = 'en-US';
+        }
+        
+        utterance.rate = 0.95; 
+        utterance.pitch = 1.0;
+
+        utterance.onend = function() {
+            isSpeaking = false;
+            document.getElementById('btn-speak').innerHTML = `<i class="fa-solid fa-volume-high me-2" style="color: var(--primary);"></i><span data-i18n="submit.listen">${listenText}</span>`;
+        };
+
+        isSpeaking = true;
+        document.getElementById('btn-speak').innerHTML = `<i class="fa-solid fa-circle-stop me-2" style="color: #ef4444;"></i><span data-i18n="submit.stop">${stopText}</span>`;
+        synth.speak(utterance);
+    }
+</script>
 
 {% endblock body %}

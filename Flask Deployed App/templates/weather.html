@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% block pagetitle %}Weather Disease Risk{% endblock pagetitle %}
+{% block body %}
+
+<div class="row mb-5 text-center text-white">
+    <div class="col-lg-10 mx-auto">
+        <h1 class="display-4 page-title">
+            <i class="fa-solid fa-cloud-sun-rain me-2"></i>Weather Disease Risk Forecast
+        </h1>
+        <p class="lead page-subtitle">Get proactive alerts about disease risks based on your local weather conditions.</p>
+    </div>
+</div>
+
+<!-- Location Input -->
+<div class="row g-4 justify-content-center mb-4">
+    <div class="col-lg-6">
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-3" style="color: var(--primary-dark);">
+                <i class="fa-solid fa-location-dot me-2" style="color: #ef4444;"></i>Your Location
+            </h5>
+            <div class="d-flex gap-2">
+                <input type="text" id="location-input" class="form-control form-control-lg" placeholder="Enter city name (e.g., Bangalore)" style="border-radius: 14px;">
+                <button class="btn btn-gradient rounded-pill px-4" onclick="fetchWeather()">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+                <button class="btn rounded-pill px-3" style="background: rgba(14,165,233,0.15); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.3);" onclick="useGeolocation()" title="Use my location">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </button>
+            </div>
+            <small class="text-muted mt-2 d-block">Uses OpenWeatherMap free API for weather data</small>
+        </div>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div id="weather-loading" class="text-center text-white py-4" style="display: none;">
+    <div class="spinner-border text-light" role="status"></div>
+    <p class="mt-2" style="opacity: 0.7;">Analyzing weather patterns...</p>
+</div>
+
+<!-- Weather Dashboard (hidden by default) -->
+<div id="weather-dashboard" style="display: none;">
+    
+    <!-- Current Weather Card -->
+    <div class="row g-4 justify-content-center mb-4">
+        <div class="col-lg-8">
+            <div class="glass-card p-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <h4 class="fw-bold mb-1" style="color: var(--primary-dark);">
+                            <i class="fa-solid fa-map-marker-alt me-2" style="color: #ef4444;"></i>
+                            <span id="w-city">—</span>
+                        </h4>
+                        <p class="text-muted mb-0" id="w-date"></p>
+                    </div>
+                    <div class="text-center">
+                        <div id="w-icon" style="font-size: 3rem;"></div>
+                        <small id="w-desc" class="text-muted"></small>
+                    </div>
+                    <div class="d-flex gap-4 text-center">
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: var(--primary);"><span id="w-temp">—</span>°C</h3>
+                            <small class="text-muted">Temperature</small>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: #0ea5e9;"><span id="w-humidity">—</span>%</h3>
+                            <small class="text-muted">Humidity</small>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0" style="color: #f59e0b;"><span id="w-wind">—</span></h3>
+                            <small class="text-muted">Wind (m/s)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disease Risk Cards -->
+    <div class="row g-4 justify-content-center mb-4">
+        <div class="col-lg-8">
+            <h4 class="text-white fw-bold mb-3">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Disease Risk Assessment
+            </h4>
+        </div>
+    </div>
+    <div class="row g-3 justify-content-center pb-5" id="risk-cards-container">
+        <!-- Populated by JS -->
+    </div>
+</div>
+
+<!-- Initial placeholder -->
+<div id="weather-placeholder" class="text-center text-white py-5">
+    <i class="fa-solid fa-cloud-bolt" style="font-size: 4rem; opacity: 0.4;"></i>
+    <h5 class="mt-3" style="opacity: 0.7;">Enter your location to see disease risk forecasts</h5>
+    <p style="opacity: 0.5;">We analyze temperature, humidity, and weather patterns to predict which diseases may affect your crops</p>
+</div>
+
+
+<style>
+    .risk-card {
+        border-left: 4px solid;
+        transition: all 0.3s ease;
+    }
+    .risk-card:hover {
+        transform: translateY(-4px);
+    }
+    .risk-high { border-color: #ef4444; }
+    .risk-medium { border-color: #f59e0b; }
+    .risk-low { border-color: #22c55e; }
+    .risk-badge-high { background: #fef2f2; color: #ef4444; }
+    .risk-badge-medium { background: #fffbeb; color: #f59e0b; }
+    .risk-badge-low { background: #f0fdf4; color: #22c55e; }
+</style>
+
+<script>
+    // Disease-weather trigger database
+    const DISEASE_WEATHER_TRIGGERS = [
+        {
+            name: 'Tomato Late Blight',
+            crops: ['Tomato', 'Potato'],
+            tempRange: [10, 25],
+            humidityMin: 75,
+            rainTrigger: true,
+            description: 'Thrives in cool, humid conditions with frequent rain. Spores spread rapidly in wet foliage.',
+            prevention: 'Apply copper-based fungicide preventively. Avoid overhead watering. Ensure good air circulation.'
+        },
+        {
+            name: 'Tomato Early Blight',
+            crops: ['Tomato', 'Potato'],
+            tempRange: [24, 35],
+            humidityMin: 60,
+            rainTrigger: false,
+            description: 'Favors warm temperatures with moderate humidity. Stress and nitrogen deficiency increase susceptibility.',
+            prevention: 'Mulch around plants. Apply neem oil. Practice crop rotation. Remove infected lower leaves.'
+        },
+        {
+            name: 'Apple Scab',
+            crops: ['Apple'],
+            tempRange: [10, 26],
+            humidityMin: 70,
+            rainTrigger: true,
+            description: 'Fungal spores release during spring rains. Wet leaves for 9+ hours triggers infection.',
+            prevention: 'Apply fungicide before rain events. Prune for air circulation. Rake fallen leaves.'
+        },
+        {
+            name: 'Grape Black Rot',
+            crops: ['Grape'],
+            tempRange: [20, 32],
+            humidityMin: 65,
+            rainTrigger: true,
+            description: 'Warm, wet conditions after bloom are ideal. Spores spread via rain splash.',
+            prevention: 'Apply fungicide at bloom. Remove mummified berries. Ensure canopy airflow.'
+        },
+        {
+            name: 'Corn Common Rust',
+            crops: ['Corn'],
+            tempRange: [15, 25],
+            humidityMin: 80,
+            rainTrigger: false,
+            description: 'Cool nights with heavy dew. Spores blow in from tropical regions.',
+            prevention: 'Plant resistant hybrids. Foliar fungicide if detected early. Monitor fields regularly.'
+        },
+        {
+            name: 'Powdery Mildew',
+            crops: ['Cherry', 'Squash', 'Grape'],
+            tempRange: [18, 30],
+            humidityMin: 50,
+            rainTrigger: false,
+            description: 'Unlike most fungi, does NOT need rain — thrives in warm, dry conditions with high nighttime humidity.',
+            prevention: 'Apply potassium bicarbonate spray. Improve air circulation. Avoid excess nitrogen fertilizer.'
+        },
+        {
+            name: 'Bacterial Spot',
+            crops: ['Tomato', 'Pepper Bell', 'Peach'],
+            tempRange: [25, 35],
+            humidityMin: 70,
+            rainTrigger: true,
+            description: 'Bacteria spread by wind-driven rain. Hot, wet conditions accelerate infection.',
+            prevention: 'Use copper sprays. Avoid working with wet plants. Plant resistant varieties.'
+        },
+        {
+            name: 'Citrus Greening (HLB)',
+            crops: ['Orange'],
+            tempRange: [20, 35],
+            humidityMin: 40,
+            rainTrigger: false,
+            description: 'Spread by Asian citrus psyllid insects. Year-round risk in warm climates.',
+            prevention: 'Control psyllid populations. Inspect trees regularly. Remove infected trees to prevent spread.'
+        },
+        {
+            name: 'Septoria Leaf Spot',
+            crops: ['Tomato'],
+            tempRange: [20, 28],
+            humidityMin: 75,
+            rainTrigger: true,
+            description: 'Frequent rain and warm temps. Splashing water spreads spores from soil to lower leaves.',
+            prevention: 'Mulch to prevent soil splash. Apply chlorothalonil. Remove infected leaves promptly.'
+        },
+        {
+            name: 'Leaf Mold',
+            crops: ['Tomato'],
+            tempRange: [20, 30],
+            humidityMin: 85,
+            rainTrigger: false,
+            description: 'Very high humidity is the main trigger. Common in greenhouses and poorly ventilated areas.',
+            prevention: 'Improve ventilation. Reduce humidity. Space plants properly. Use resistant varieties.'
+        }
+    ];
+
+    const WEATHER_ICONS = {
+        'Clear': '☀️', 'Clouds': '☁️', 'Rain': '🌧️', 'Drizzle': '🌦️',
+        'Thunderstorm': '⛈️', 'Snow': '❄️', 'Mist': '🌫️', 'Fog': '🌫️',
+        'Haze': '🌤️', 'Dust': '🌪️', 'Smoke': '💨'
+    };
+
+    // Use a free public weather API (no key required)
+    const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
+
+    // Geocoding API (free, no key)
+    const GEO_API = 'https://geocoding-api.open-meteo.com/v1/search';
+
+    function useGeolocation() {
+        if (!navigator.geolocation) {
+            alert('Geolocation not supported by your browser.');
+            return;
+        }
+        document.getElementById('weather-loading').style.display = '';
+        document.getElementById('weather-placeholder').style.display = 'none';
+
+        navigator.geolocation.getCurrentPosition(
+            pos => fetchWeatherByCoords(pos.coords.latitude, pos.coords.longitude, 'Your Location'),
+            err => {
+                alert('Unable to get location. Please enter a city name manually.');
+                document.getElementById('weather-loading').style.display = 'none';
+                document.getElementById('weather-placeholder').style.display = '';
+            }
+        );
+    }
+
+    function fetchWeather() {
+        const city = document.getElementById('location-input').value.trim();
+        if (!city) return;
+
+        document.getElementById('weather-loading').style.display = '';
+        document.getElementById('weather-placeholder').style.display = 'none';
+        document.getElementById('weather-dashboard').style.display = 'none';
+
+        // Geocode city name first
+        fetch(`${GEO_API}?name=${encodeURIComponent(city)}&count=1`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.results || data.results.length === 0) {
+                    alert('City not found. Try another name.');
+                    document.getElementById('weather-loading').style.display = 'none';
+                    document.getElementById('weather-placeholder').style.display = '';
+                    return;
+                }
+                const loc = data.results[0];
+                fetchWeatherByCoords(loc.latitude, loc.longitude, loc.name + (loc.country ? ', ' + loc.country : ''));
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error fetching location data.');
+                document.getElementById('weather-loading').style.display = 'none';
+                document.getElementById('weather-placeholder').style.display = '';
+            });
+    }
+
+    function fetchWeatherByCoords(lat, lon, cityName) {
+        const url = `${WEATHER_API}?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=auto&forecast_days=7`;
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('weather-loading').style.display = 'none';
+                document.getElementById('weather-dashboard').style.display = '';
+                renderWeather(data, cityName);
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error fetching weather data.');
+                document.getElementById('weather-loading').style.display = 'none';
+                document.getElementById('weather-placeholder').style.display = '';
+            });
+    }
+
+    // WMO Weather codes to descriptions
+    function wmoToDesc(code) {
+        const map = {
+            0: 'Clear', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Overcast',
+            45: 'Fog', 48: 'Rime Fog', 51: 'Light Drizzle', 53: 'Drizzle',
+            55: 'Heavy Drizzle', 61: 'Light Rain', 63: 'Rain', 65: 'Heavy Rain',
+            71: 'Light Snow', 73: 'Snow', 75: 'Heavy Snow', 80: 'Rain Showers',
+            81: 'Heavy Showers', 82: 'Violent Showers', 95: 'Thunderstorm'
+        };
+        return map[code] || 'Unknown';
+    }
+
+    function wmoToIcon(code) {
+        if (code === 0 || code === 1) return '☀️';
+        if (code <= 3) return '⛅';
+        if (code <= 48) return '🌫️';
+        if (code <= 55) return '🌦️';
+        if (code <= 65 || code >= 80 && code <= 82) return '🌧️';
+        if (code <= 75) return '❄️';
+        if (code >= 95) return '⛈️';
+        return '🌤️';
+    }
+
+    function isRainy(code) {
+        return code >= 51 && code <= 82 || code >= 95;
+    }
+
+    function renderWeather(data, cityName) {
+        const current = data.current;
+        const daily = data.daily;
+
+        // Current conditions
+        document.getElementById('w-city').textContent = cityName;
+        document.getElementById('w-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('w-temp').textContent = Math.round(current.temperature_2m);
+        document.getElementById('w-humidity').textContent = current.relative_humidity_2m;
+        document.getElementById('w-wind').textContent = current.wind_speed_10m.toFixed(1);
+        document.getElementById('w-icon').textContent = wmoToIcon(current.weather_code);
+        document.getElementById('w-desc').textContent = wmoToDesc(current.weather_code);
+
+        // Assess disease risks
+        const temp = current.temperature_2m;
+        const humidity = current.relative_humidity_2m;
+        
+        // Check 7-day rain forecast
+        let rainyDays = 0;
+        let totalRain = 0;
+        for (let i = 0; i < daily.precipitation_sum.length; i++) {
+            if (daily.precipitation_sum[i] > 0.5) rainyDays++;
+            totalRain += daily.precipitation_sum[i];
+        }
+        const hasRain = rainyDays > 0 || isRainy(current.weather_code);
+
+        // Evaluate each disease
+        const risks = DISEASE_WEATHER_TRIGGERS.map(disease => {
+            let score = 0;
+            let factors = [];
+
+            // Temperature match
+            if (temp >= disease.tempRange[0] && temp <= disease.tempRange[1]) {
+                score += 35;
+                factors.push(`Temperature ${Math.round(temp)}°C is in ideal range (${disease.tempRange[0]}–${disease.tempRange[1]}°C)`);
+            } else {
+                const dist = Math.min(Math.abs(temp - disease.tempRange[0]), Math.abs(temp - disease.tempRange[1]));
+                if (dist < 5) {
+                    score += 15;
+                    factors.push(`Temperature close to risk range`);
+                }
+            }
+
+            // Humidity match
+            if (humidity >= disease.humidityMin) {
+                score += 30;
+                factors.push(`Humidity ${humidity}% exceeds ${disease.humidityMin}% threshold`);
+            } else if (humidity >= disease.humidityMin - 10) {
+                score += 10;
+                factors.push(`Humidity approaching risk threshold`);
+            }
+
+            // Rain
+            if (disease.rainTrigger && hasRain) {
+                score += 25;
+                factors.push(`Rain detected (${rainyDays} rainy day(s) in 7-day forecast, ${totalRain.toFixed(1)}mm total)`);
+            } else if (disease.rainTrigger && !hasRain) {
+                factors.push('No rain expected — reduces risk');
+            } else if (!disease.rainTrigger) {
+                score += 10; // Diseases that don't need rain are always somewhat likely
+                factors.push('Rain not required for this disease');
+            }
+
+            let level, levelClass;
+            if (score >= 65) { level = 'HIGH'; levelClass = 'high'; }
+            else if (score >= 35) { level = 'MEDIUM'; levelClass = 'medium'; }
+            else { level = 'LOW'; levelClass = 'low'; }
+
+            return { ...disease, score, level, levelClass, factors };
+        });
+
+        // Sort by risk score (highest first)
+        risks.sort((a, b) => b.score - a.score);
+
+        // Render risk cards
+        const container = document.getElementById('risk-cards-container');
+        container.innerHTML = '';
+
+        risks.forEach(risk => {
+            const card = document.createElement('div');
+            card.className = 'col-lg-4 col-md-6';
+            card.innerHTML = `
+                <div class="glass-card p-4 risk-card risk-${risk.levelClass}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="fw-bold mb-0" style="color: var(--primary-dark);">${risk.name}</h6>
+                        <span class="badge rounded-pill risk-badge-${risk.levelClass}" style="font-size: 0.7rem; padding: 5px 10px;">
+                            ${risk.level} RISK
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-2">
+                        <strong>Affects:</strong> ${risk.crops.join(', ')}
+                    </p>
+                    <p class="text-muted small mb-2">${risk.description}</p>
+                    
+                    <div class="mb-2">
+                        <div style="background: #e5e7eb; border-radius: 4px; height: 6px; overflow: hidden;">
+                            <div style="width: ${risk.score}%; height: 100%; border-radius: 4px; transition: width 1s ease;
+                                background: ${risk.levelClass === 'high' ? '#ef4444' : risk.levelClass === 'medium' ? '#f59e0b' : '#22c55e'};">
+                            </div>
+                        </div>
+                        <small class="text-muted">${risk.score}% risk score</small>
+                    </div>
+
+                    <details class="mt-2">
+                        <summary class="small fw-bold" style="cursor: pointer; color: var(--primary);">
+                            <i class="fa-solid fa-clipboard-list me-1"></i>Risk Factors & Prevention
+                        </summary>
+                        <ul class="small text-muted mt-2 mb-2 ps-3">
+                            ${risk.factors.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                        <p class="small mb-0" style="color: var(--primary-dark);"><strong>🛡️ Prevention:</strong> ${risk.prevention}</p>
+                    </details>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Add 7-day forecast summary row
+        const forecastRow = document.createElement('div');
+        forecastRow.className = 'col-lg-8';
+        forecastRow.innerHTML = `
+            <div class="glass-card p-4 mt-2">
+                <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">
+                    <i class="fa-solid fa-calendar-week me-2"></i>7-Day Forecast Overview
+                </h6>
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    ${daily.time.map((date, i) => `
+                        <div class="text-center" style="min-width: 70px;">
+                            <small class="text-muted d-block">${new Date(date).toLocaleDateString('en-US', {weekday: 'short'})}</small>
+                            <div style="font-size: 1.5rem;">${wmoToIcon(daily.weather_code[i])}</div>
+                            <small class="fw-bold">${Math.round(daily.temperature_2m_max[i])}°</small>
+                            <small class="text-muted">/ ${Math.round(daily.temperature_2m_min[i])}°</small>
+                            ${daily.precipitation_sum[i] > 0 ? `<br><small style="color: #0ea5e9;">${daily.precipitation_sum[i].toFixed(1)}mm</small>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        container.appendChild(forecastRow);
+    }
+
+    // Allow Enter key on input
+    document.getElementById('location-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') fetchWeather();
+    });
+</script>
+
+{% endblock body %}
